@@ -148,6 +148,27 @@ test_list_insert(void)
     TEST_CHECK(n == 6);
 }
 
+static void
+test_list_foreach(void)
+{
+    List list;
+    ListNode* node;
+    Data* data;
+    int i;
+
+    /* Build a list. */
+    list_init(&list);
+    for(i = 0; i < 100; i++)
+        list_append(&list, &alloc_data(i)->list_node);
+
+    /* Verify we can walk it. */
+    i = 0;
+    LIST_FOR_EACH(&list, node) {
+        data = LIST_DATA(node, Data, list_node);
+        TEST_CHECK(data->value == i++);
+    }
+}
+
 
 /**************************
  *** Single linked list ***
@@ -253,6 +274,27 @@ test_slist_insert(void)
         n++;
     }
     TEST_CHECK(n == 5);
+}
+
+static void
+test_slist_foreach(void)
+{
+    SList list;
+    SListNode* node;
+    SData* data;
+    int i;
+
+    /* Build a list. */
+    slist_init(&list);
+    for(i = 0; i < 100; i++)
+        slist_prepend(&list, &alloc_sdata(i)->list_node);
+
+    /* Verify we can walk it. */
+    i = 100;
+    SLIST_FOR_EACH(&list, node) {
+        data = SLIST_DATA(node, SData, list_node);
+        TEST_CHECK(data->value == --i);
+    }
 }
 
 
@@ -363,6 +405,27 @@ test_qlist_insert(void)
     TEST_CHECK(n == 6);
 }
 
+static void
+test_qlist_foreach(void)
+{
+    QList list;
+    QListNode* node;
+    QData* data;
+    int i;
+
+    /* Build a list. */
+    qlist_init(&list);
+    for(i = 0; i < 100; i++)
+        qlist_append(&list, &alloc_qdata(i)->list_node);
+
+    /* Verify we can walk it. */
+    i = 0;
+    QLIST_FOR_EACH(&list, node) {
+        data = QLIST_DATA(node, QData, list_node);
+        TEST_CHECK(data->value == i++);
+    }
+}
+
 
 /*********************
  *** List of tests ***
@@ -372,14 +435,17 @@ TEST_LIST = {
     { "list-empty",     test_list_empty },
     { "list-iterate",   test_list_iterate },
     { "list-insert",    test_list_insert },
+    { "list-foreach",   test_list_foreach },
 
     { "slist-empty",    test_slist_empty },
     { "slist-iterate",  test_slist_iterate },
     { "slist-insert",   test_slist_insert },
+    { "slist-foreach",  test_slist_foreach },
 
     { "qlist-empty",    test_qlist_empty },
     { "qlist-iterate",  test_qlist_iterate },
     { "qlist-insert",   test_qlist_insert },
+    { "qlist-foreach",  test_qlist_foreach },
 
     { NULL, NULL }
 };

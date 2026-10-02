@@ -177,14 +177,16 @@ static inline const ListNode* list_end(const List* list)    { return &list->main
  * attempt to add the node into multiple lists (or multiple times into the
  * same list), the result is undefined.
  */
-static inline void list_insert_after(ListNode* node_where, ListNode* node)
-        { node->p = node_where; node->n = node_where->n; node_where->n = node; node->n->p = node; }
-static inline void list_insert_before(ListNode* node_where, ListNode* node)
-        { node->p = node_where->p; node->n = node_where; node_where->p = node; node->p->n = node; }
+static inline void list_insert_after(List* list, ListNode* node_where, ListNode* node)
+        { (void)list; node->p = node_where; node->n = node_where->n;
+            node_where->n = node; node->n->p = node; }
+static inline void list_insert_before(List* list, ListNode* node_where, ListNode* node)
+        { (void)list; node->p = node_where->p; node->n = node_where;
+            node_where->p = node; node->p->n = node; }
 static inline void list_append(List* list, ListNode* node)
-        { list_insert_before(&list->main, node); }
+        { list_insert_before(list, &list->main, node); }
 static inline void list_prepend(List* list, ListNode* node)
-        { list_insert_after(&list->main, node); }
+        { list_insert_after(list, &list->main, node); }
 
 /* Disconnect the given node from its list.
  */
@@ -194,6 +196,11 @@ static inline void list_remove_head(List* list)
         { list_remove(list, list->main.n); }
 static inline void list_remove_tail(List* list)
         { list_remove(list, list->main.p); }
+
+/* Convenient macro for walking the whole list.
+ */
+#define LIST_FOR_EACH(list, node)  \
+        for((node) = list_head((list)); (node) != list_end((list)); (node) = list_next((node)))
 
 
 /**********************************
@@ -234,9 +241,9 @@ static inline int slist_is_empty(const SList* list)
 
 /* Iterating the list.
  */
-static inline SListNode* slist_head(const SList* list)         { return list->main.n; }
-static inline SListNode* slist_next(const SListNode* node)    { return node->n; }
-static inline const SListNode* slist_end(const SList* list)    { return &list->main; }
+static inline SListNode* slist_head(const SList* list)      { return list->main.n; }
+static inline SListNode* slist_next(const SListNode* node)  { return node->n; }
+static inline const SListNode* slist_end(const SList* list) { return &list->main; }
 
 /* Add the given node into the list.
  *
@@ -244,17 +251,22 @@ static inline const SListNode* slist_end(const SList* list)    { return &list->m
  * attempt to add the node into multiple lists (or multiple times into the
  * same list), the result is undefined.
  */
-static inline void slist_insert_after(SListNode* node_where, SListNode* node)
-        { node->n = node_where->n; node_where->n = node; }
+static inline void slist_insert_after(SList* list, SListNode* node_where, SListNode* node)
+        { (void)list; node->n = node_where->n; node_where->n = node; }
 static inline void slist_prepend(SList* list, SListNode* node)
-        { slist_insert_after(&list->main, node); }
+        { slist_insert_after(list, &list->main, node); }
 
 /* Disconnect the given node from its list.
  */
-static inline void slist_remove(SListNode* node_prev, SListNode* node)
-        { node_prev->n = node->n; }
+static inline void slist_remove(SList* list, SListNode* node_prev, SListNode* node)
+        { (void)list; node_prev->n = node->n; }
 static inline void slist_remove_head(SList* list)
-        { slist_remove(&list->main, list->main.n); }
+        { slist_remove(list, &list->main, list->main.n); }
+
+/* Convenient macro for walking the whole list.
+ */
+#define SLIST_FOR_EACH(list, node)  \
+        for((node) = slist_head((list)); (node) != slist_end((list)); (node) = slist_next((node)))
 
 
 /*****************************************************
@@ -295,7 +307,7 @@ static inline int qlist_is_empty(const QList* list)
  */
 static inline QListNode* qlist_head(const QList* list)         { return list->main.n; }
 static inline QListNode* qlist_tail(const QList* list)         { return list->tail; }
-static inline QListNode* qlist_next(const QListNode* node)    { return node->n; }
+static inline QListNode* qlist_next(const QListNode* node)     { return node->n; }
 static inline const QListNode* qlist_end(const QList* list)    { return &list->main; }
 
 /* Add the given node into the list.
@@ -319,6 +331,12 @@ static inline void qlist_remove(QList* list, QListNode* node_prev, QListNode* no
           if(list->tail == node) list->tail = node_prev; }
 static inline void qlist_remove_head(QList* list)
         { qlist_remove(list, &list->main, list->main.n); }
+
+
+/* Convenient macro for walking the whole list.
+ */
+#define QLIST_FOR_EACH(list, node)  \
+        for((node) = qlist_head((list)); (node) != qlist_end((list)); (node) = qlist_next((node)))
 
 
 #ifdef __cplusplus
