@@ -2,7 +2,7 @@
  * libex
  * <http://github.com/mity/libex>
  *
- * Copyright (c) 2017-2026 Martin Mitáš
+ * Copyright (c) 2016-2026 Martin Mitáš
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -23,47 +23,37 @@
  * IN THE SOFTWARE.
  */
 
-#include "acutest.h"
-#include "crc32.h"
+#ifndef EX_FNV1A64_H
+#define EX_FNV1A64_H
+
+#include <stdlib.h>
+#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
-typedef struct TestVector {
-    const char* str;
-    size_t n;
-    uint32_t crc32;
-} TestVector;
+/* 64-bit Fowler-Noll-Vo hash implementation.
+ * (http://www.isthe.com/chongo/tech/comp/fnv/)
+ *
+ * We implement 1a variant of the function as it is generally recommended
+ * and preferred over the original variant 1.
+ */
 
-#define LEN(x)      (sizeof(x)-1)
-#define TEST(x)     x, LEN(x)
+#define FNV1A_64_INIT       ((uint64_t)14695981039346656037U)
 
-
-static const TestVector test_vectrors[] = {
-    { TEST("123456789"), 0xcbf43926U },
-    { 0 }
-};
+static inline uint64_t fnv1a_64_beg(void)
+    { return FNV1A_64_INIT; }
+uint64_t fnv1a_64_part(uint64_t fnv1a, const void* data, size_t n);
 
 
-static void
-test_crc32(void)
-{
-    int i;
-
-    for(i = 0; test_vectrors[i].str != NULL; i++) {
-        const char* str = test_vectrors[i].str;
-        size_t n = test_vectrors[i].n;
-        uint32_t expected = test_vectrors[i].crc32;
-        uint32_t produced;
-
-        produced = crc32(str, n);
-        if(!TEST_CHECK_(produced == expected, "vector '%.*s'", (int)n, str)) {
-            TEST_MSG("Expected: %x", (unsigned) expected);
-            TEST_MSG("Produced: %x", (unsigned) produced);
-        }
-    }
-}
+static inline uint64_t fnv1a_64(const void* data, size_t n)
+    { return fnv1a_64_part(FNV1A_64_INIT, data, n); }
 
 
-TEST_LIST = {
-    { "crc32",      test_crc32 },
-    { 0 }
-};
+#ifdef __cplusplus
+}  /* extern "C" { */
+#endif
+
+#endif  /* EX_FNV1A64_H */

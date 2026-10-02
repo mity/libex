@@ -30,7 +30,7 @@
 static void
 test_init(void)
 {
-    BUFFER buf;
+    Buffer buf;
 
     buffer_init(&buf);
 
@@ -46,7 +46,7 @@ test_init(void)
 static void
 test_grow(void)
 {
-    BUFFER buf = BUFFER_INITIALIZER;
+    Buffer buf = BUFFER_INITIALIZER;
     size_t i, n = 100;
     char c;
 
@@ -67,7 +67,7 @@ test_grow(void)
 static void
 test_reserve(void)
 {
-    BUFFER buf = BUFFER_INITIALIZER;
+    Buffer buf = BUFFER_INITIALIZER;
     size_t i, n = 100;
     char c;
 
@@ -91,7 +91,7 @@ test_reserve(void)
 static void
 test_shrink(void)
 {
-    BUFFER buf = BUFFER_INITIALIZER;
+    Buffer buf = BUFFER_INITIALIZER;
 
     buffer_append(&buf, "1234567890", 10);
     buffer_reserve(&buf, 1000);
@@ -108,7 +108,7 @@ test_shrink(void)
 static void
 test_insert(void)
 {
-    BUFFER buf = BUFFER_INITIALIZER;
+    Buffer buf = BUFFER_INITIALIZER;
 
     buffer_append(&buf, "1234567890", 10);
     buffer_insert(&buf, 3, "foo", strlen("foo"));
@@ -120,7 +120,7 @@ test_insert(void)
 static void
 test_remove(void)
 {
-    BUFFER buf = BUFFER_INITIALIZER;
+    Buffer buf = BUFFER_INITIALIZER;
 
     buffer_append(&buf, "1234567890", 10);
     buffer_remove(&buf, 3, 4);
@@ -132,7 +132,7 @@ test_remove(void)
 static void
 test_remove_most(void)
 {
-    BUFFER buf = BUFFER_INITIALIZER;
+    Buffer buf = BUFFER_INITIALIZER;
     int i;
 
     for(i = 0; i < 1000; i++)
@@ -147,7 +147,7 @@ test_remove_most(void)
 static void
 test_remove_all(void)
 {
-    BUFFER buf = BUFFER_INITIALIZER;
+    Buffer buf = BUFFER_INITIALIZER;
 
     buffer_append(&buf, "1234567890", 10);
     buffer_remove(&buf, 0, 10);

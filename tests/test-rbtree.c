@@ -30,7 +30,7 @@
 
 
 /* Provided by rbtree.c when built with -DEX_TEST. */
-int rbtree_verify(RBTREE* tree);
+int rbtree_verify(RBTree* tree);
 
 
 /******************************************************
@@ -38,17 +38,17 @@ int rbtree_verify(RBTREE* tree);
  ******************************************************/
 
 /* Payload structures for our tree. */
-typedef struct VAL {
+typedef struct Val {
     int x;
-    RBTREE_NODE the_node;
-} VAL;
+    RBTreeNode the_node;
+} Val;
 
-/* Comparator of our VAL structures. */
+/* Comparator of our Val structures. */
 static int
-val_cmp(const RBTREE_NODE* node1, const RBTREE_NODE* node2)
+val_cmp(const RBTreeNode* node1, const RBTreeNode* node2)
 {
-    const VAL* val1 = RBTREE_DATA(node1, VAL, the_node);
-    const VAL* val2 = RBTREE_DATA(node2, VAL, the_node);
+    const Val* val1 = RBTREE_DATA(node1, Val, the_node);
+    const Val* val2 = RBTREE_DATA(node2, Val, the_node);
 
     if(val1->x < val2->x)
         return -1;
@@ -57,15 +57,15 @@ val_cmp(const RBTREE_NODE* node1, const RBTREE_NODE* node2)
     return 0;
 }
 
-/* Factory of our VAL structures. For our convenience, it returns pointer
- * to the RBTREE_NODE, so we can pass it directly into rbtree functions.
+/* Factory of our Val structures. For our convenience, it returns pointer
+ * to the RBTreeNode, so we can pass it directly into rbtree functions.
  * expecting that. */
-static RBTREE_NODE*
+static RBTreeNode*
 make_val(int x)
 {
-    VAL* v;
+    Val* v;
 
-    v = (VAL*) malloc(sizeof(VAL));
+    v = (Val*) malloc(sizeof(Val));
     TEST_ASSERT(v != NULL);
     v->x = x;
 
@@ -73,20 +73,20 @@ make_val(int x)
 }
 
 static void
-destroy_val(VAL* val)
+destroy_val(Val* val)
 {
     free(val);
 }
 
 static void
-clear_tree(RBTREE* tree)
+clear_tree(RBTree* tree)
 {
-    RBTREE_NODE* node;
+    RBTreeNode* node;
     while(1) {
         node = rbtree_fini_step(tree);
         if(node == NULL)
             break;
-        free(RBTREE_DATA(node, VAL, the_node));
+        free(RBTREE_DATA(node, Val, the_node));
     }
 }
 
@@ -98,7 +98,7 @@ clear_tree(RBTREE* tree)
 static void
 test_empty(void)
 {
-    RBTREE tree = RBTREE_INITIALIZER(val_cmp);
+    RBTree tree = RBTREE_INITIALIZER(val_cmp);
 
     TEST_CHECK(rbtree_verify(&tree) == 0);
     TEST_CHECK(rbtree_is_empty(&tree));
@@ -112,9 +112,9 @@ test_empty(void)
 static void
 test_fini(void)
 {
-    RBTREE tree = RBTREE_INITIALIZER(val_cmp);
-    RBTREE_NODE* node;
-    VAL* val;
+    RBTree tree = RBTREE_INITIALIZER(val_cmp);
+    RBTreeNode* node;
+    Val* val;
     int i;
     char visit_flag[1000] = { 0 };
 
@@ -129,7 +129,7 @@ test_fini(void)
         if(node == NULL)
             break;
 
-        val = RBTREE_DATA(node, VAL, the_node);
+        val = RBTREE_DATA(node, Val, the_node);
         if(!TEST_CHECK(0 <= val->x  &&  val->x < 1000))
             continue;
 
@@ -157,9 +157,9 @@ test_insert_lookup(void)
         { "Descending order",   { 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 } },
         { "Randomized order",   { 8, 1, 12, 6, 4, 14, 11, 9, 10, 15, 2, 13, 3, 5, 7 } }
     };
-    VAL key, tmp;
+    Val key, tmp;
 
-    RBTREE tree = RBTREE_INITIALIZER(val_cmp);
+    RBTree tree = RBTREE_INITIALIZER(val_cmp);
     int vec, i;
 
     for(vec = 0; vec < sizeof(vectors) / sizeof(vectors[0]); vec++) {
@@ -202,9 +202,9 @@ static void
 test_build(void)
 {
     static const int count = 4;
-    RBTREE tree = RBTREE_INITIALIZER(val_cmp);
-    VAL vals[count];
-    RBTREE_NODE* nodes[count];
+    RBTree tree = RBTREE_INITIALIZER(val_cmp);
+    Val vals[count];
+    RBTreeNode* nodes[count];
     int i;
 
     for(i = 0; i < count; i++) {
@@ -216,7 +216,7 @@ test_build(void)
     TEST_CHECK(rbtree_verify(&tree) == 0);
 
     for(i = 0; i < count; i++) {
-        VAL key;
+        Val key;
         key.x = i;
         TEST_CHECK(rbtree_lookup(&tree, &key.the_node) != NULL);
     }
@@ -225,9 +225,9 @@ test_build(void)
 static void
 test_remove(void)
 {
-    RBTREE tree = RBTREE_INITIALIZER(val_cmp);
-    VAL key;
-    RBTREE_NODE* removed;
+    RBTree tree = RBTREE_INITIALIZER(val_cmp);
+    Val key;
+    RBTreeNode* removed;
     int i;
 
     for(i = 0; i < 1000; i++)
@@ -250,7 +250,7 @@ test_remove(void)
         /* And the tree is still in a good shape. */
         TEST_CHECK(rbtree_verify(&tree) == 0);
 
-        destroy_val(RBTREE_DATA(removed, VAL, the_node));
+        destroy_val(RBTREE_DATA(removed, Val, the_node));
     }
 
     /* Remove all remaining values. */
@@ -277,16 +277,16 @@ test_walk_forward(void)
         { "Randomized order",   { 8, 1, 12, 6, 4, 14, 11, 9, 10, 15, 2, 13, 3, 5, 7 } }
     };
 
-    RBTREE tree = RBTREE_INITIALIZER(val_cmp);
+    RBTree tree = RBTREE_INITIALIZER(val_cmp);
     int vec, i;
-    VAL* val;
-    VAL key;
+    Val* val;
+    Val key;
 
     for(vec = 0; vec < sizeof(vectors) / sizeof(vectors[0]); vec++) {
         const char* name = vectors[vec].name;
         const int* values = vectors[vec].values;
-        RBTREE_CURSOR cur;
-        RBTREE_NODE* node;
+        RBTreeCursor cur;
+        RBTreeNode* node;
 
         TEST_CASE(name);
 
@@ -300,7 +300,7 @@ test_walk_forward(void)
             node != NULL;
             node = rbtree_next(&cur), i++)
         {
-            val = RBTREE_DATA(node, VAL, the_node);
+            val = RBTREE_DATA(node, Val, the_node);
             TEST_CHECK(val->x == i);
         }
 
@@ -329,16 +329,16 @@ test_walk_backward(void)
         { "Randomized order",   { 8, 1, 12, 6, 4, 14, 11, 9, 10, 15, 2, 13, 3, 5, 7 } }
     };
 
-    RBTREE tree = RBTREE_INITIALIZER(val_cmp);
+    RBTree tree = RBTREE_INITIALIZER(val_cmp);
     int vec, i;
-    VAL* val;
-    VAL key;
+    Val* val;
+    Val key;
 
     for(vec = 0; vec < sizeof(vectors) / sizeof(vectors[0]); vec++) {
         const char* name = vectors[vec].name;
         const int* values = vectors[vec].values;
-        RBTREE_CURSOR cur;
-        RBTREE_NODE* node;
+        RBTreeCursor cur;
+        RBTreeNode* node;
 
         TEST_CASE(name);
 
@@ -352,7 +352,7 @@ test_walk_backward(void)
             node != NULL;
             node = rbtree_prev(&cur), i--)
         {
-            val = RBTREE_DATA(node, VAL, the_node);
+            val = RBTREE_DATA(node, Val, the_node);
             TEST_CHECK(val->x == i);
         }
 
@@ -372,10 +372,10 @@ test_walk_backward(void)
 static void
 test_lookup_ex(void)
 {
-    RBTREE tree = RBTREE_INITIALIZER(val_cmp);
-    RBTREE_CURSOR cur;
-    RBTREE_NODE* node;
-    VAL key;
+    RBTree tree = RBTREE_INITIALIZER(val_cmp);
+    RBTreeCursor cur;
+    RBTreeNode* node;
+    Val key;
     int i;
 
     for(i = 0; i < 1000; i++)

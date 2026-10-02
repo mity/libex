@@ -39,11 +39,11 @@
 
 
 static int
-cmdline_handle_short_opt_group(const CMDLINE_OPTION* options, const char* arggroup,
+cmdline_handle_short_opt_group(const CmdlineOption* options, const char* arggroup,
         int (*callback)(int /*optval*/, const char* /*arg*/, void* /*userdata*/),
         void* userdata)
 {
-    const CMDLINE_OPTION* opt;
+    const CmdlineOption* opt;
     int i;
     int ret = 0;
 
@@ -73,11 +73,11 @@ cmdline_handle_short_opt_group(const CMDLINE_OPTION* options, const char* arggro
 }
 
 int
-cmdline_read(const CMDLINE_OPTION* options, int argc, char** argv,
+cmdline_read(const CmdlineOption* options, int argc, char** argv,
         int (*callback)(int /*optval*/, const char* /*arg*/, void* /*userdata*/),
         void* userdata)
 {
-    const CMDLINE_OPTION* opt;
+    const CmdlineOption* opt;
     char auxbuf[CMDLINE_AUXBUF_SIZE+1];
     int fast_optarg_decision = 1;
     int after_doubledash = 0;

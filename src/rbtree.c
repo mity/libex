@@ -33,25 +33,25 @@
 #define IS_RED(node)            (COLOR(node) == RED_FLAG)
 #define IS_BLACK(node)          (COLOR(node) != RED_FLAG)
 
-#define MAKE_RED(node)          do { (node)->lc = (RBTREE_NODE*)((uintptr_t)(node)->lc | RED_FLAG); } while(0)
-#define MAKE_BLACK(node)        do { (node)->lc = (RBTREE_NODE*)((uintptr_t)(node)->lc & ~RED_FLAG); } while(0)
-#define TOGGLE_COLOR(node)      do { (node)->lc = (RBTREE_NODE*)((uintptr_t)(node)->lc ^ RED_FLAG); } while(0)
+#define MAKE_RED(node)          do { (node)->lc = (RBTreeNode*)((uintptr_t)(node)->lc | RED_FLAG); } while(0)
+#define MAKE_BLACK(node)        do { (node)->lc = (RBTreeNode*)((uintptr_t)(node)->lc & ~RED_FLAG); } while(0)
+#define TOGGLE_COLOR(node)      do { (node)->lc = (RBTreeNode*)((uintptr_t)(node)->lc ^ RED_FLAG); } while(0)
 
-#define LEFT(node)              ((RBTREE_NODE*)((uintptr_t)(node)->lc & ~RED_FLAG))
+#define LEFT(node)              ((RBTreeNode*)((uintptr_t)(node)->lc & ~RED_FLAG))
 #define RIGHT(node)             ((node)->r)
 
-#define SET_LEFT(node, ptr)     do { (node)->lc = (RBTREE_NODE*)((uintptr_t)(ptr) | COLOR(node)); } while(0)
+#define SET_LEFT(node, ptr)     do { (node)->lc = (RBTreeNode*)((uintptr_t)(ptr) | COLOR(node)); } while(0)
 #define SET_RIGHT(node, ptr)    do { (node)->r = (ptr); } while(0)
 
 
-typedef RBTREE_CURSOR RBTREE_PATH;
+typedef RBTreeCursor RBTreePath;
 
 
 /* Helper tree "rotation" operations, used as primitives for re-balancing. */
 static void
-rbtree_rotate_left(RBTREE* tree, RBTREE_NODE* parent, RBTREE_NODE* node)
+rbtree_rotate_left(RBTree* tree, RBTreeNode* parent, RBTreeNode* node)
 {
-    RBTREE_NODE* tmp;
+    RBTreeNode* tmp;
 
     tmp = RIGHT(node);
     SET_RIGHT(node, LEFT(tmp));
@@ -68,9 +68,9 @@ rbtree_rotate_left(RBTREE* tree, RBTREE_NODE* parent, RBTREE_NODE* node)
 }
 
 static void
-rbtree_rotate_right(RBTREE* tree, RBTREE_NODE* parent, RBTREE_NODE* node)
+rbtree_rotate_right(RBTree* tree, RBTreeNode* parent, RBTreeNode* node)
 {
-    RBTREE_NODE* tmp;
+    RBTreeNode* tmp;
 
     tmp = LEFT(node);
     SET_LEFT(node, RIGHT(tmp));
@@ -87,7 +87,7 @@ rbtree_rotate_right(RBTREE* tree, RBTREE_NODE* parent, RBTREE_NODE* node)
 }
 
 static void
-rbtree_leftmost_path(RBTREE_NODE* node, RBTREE_PATH* path)
+rbtree_leftmost_path(RBTreeNode* node, RBTreePath* path)
 {
     while(node != NULL) {
         path->path[path->n++] = node;
@@ -96,7 +96,7 @@ rbtree_leftmost_path(RBTREE_NODE* node, RBTREE_PATH* path)
 }
 
 static void
-rbtree_rightmost_path(RBTREE_NODE* node, RBTREE_PATH* path)
+rbtree_rightmost_path(RBTreeNode* node, RBTreePath* path)
 {
     while(node != NULL) {
         path->path[path->n++] = node;
@@ -105,11 +105,11 @@ rbtree_rightmost_path(RBTREE_NODE* node, RBTREE_PATH* path)
 }
 
 
-RBTREE_NODE*
-rbtree_fini_step(RBTREE* tree)
+RBTreeNode*
+rbtree_fini_step(RBTree* tree)
 {
-    RBTREE_NODE** pointer_down_to_node = &tree->root;
-    RBTREE_NODE* node = tree->root;
+    RBTreeNode** pointer_down_to_node = &tree->root;
+    RBTreeNode* node = tree->root;
 
     if(node != NULL) {
         /* Go down as far as possible through left children. */
@@ -146,8 +146,8 @@ rbtree_fini_step(RBTREE* tree)
  * or he can avoid calling this function altogether (if tree->root == NULL).
  */
 static int
-rbtree_lookup_path(RBTREE_NODE* node, const RBTREE_NODE* key,
-                   RBTREE_CMP_FUNC cmp_func, RBTREE_PATH* path)
+rbtree_lookup_path(RBTreeNode* node, const RBTreeNode* key,
+                   RBTreeCmpFunc cmp_func, RBTreePath* path)
 {
     int cmp = 0;
 
@@ -170,13 +170,13 @@ rbtree_lookup_path(RBTREE_NODE* node, const RBTREE_NODE* key,
 }
 
 static void
-rbtree_insert_fixup(RBTREE* tree, RBTREE_PATH* path)
+rbtree_insert_fixup(RBTree* tree, RBTreePath* path)
 {
-    RBTREE_NODE* node;
-    RBTREE_NODE* parent;
-    RBTREE_NODE* grandparent;
-    RBTREE_NODE* grandgrandparent;
-    RBTREE_NODE* uncle;
+    RBTreeNode* node;
+    RBTreeNode* parent;
+    RBTreeNode* grandparent;
+    RBTreeNode* grandgrandparent;
+    RBTreeNode* uncle;
 
     /* A newly inserted node usually (except the root) starts as a red one,
      * i.e. it could introduce "a double red" problem in the tree, where both
@@ -244,9 +244,9 @@ rbtree_insert_fixup(RBTREE* tree, RBTREE_PATH* path)
 }
 
 int
-rbtree_insert(RBTREE* tree, RBTREE_NODE* node)
+rbtree_insert(RBTree* tree, RBTreeNode* node)
 {
-    RBTREE_PATH path;
+    RBTreePath path;
     int cmp;
 
     path.n = 0;
@@ -279,8 +279,8 @@ rbtree_insert(RBTREE* tree, RBTREE_NODE* node)
     return 0;
 }
 
-static RBTREE_NODE*
-rbtree_build_recurse(RBTREE_NODE** nodes, size_t n, int level, int* p_red_level)
+static RBTreeNode*
+rbtree_build_recurse(RBTreeNode** nodes, size_t n, int level, int* p_red_level)
 {
     size_t index;
 
@@ -304,7 +304,7 @@ rbtree_build_recurse(RBTREE_NODE** nodes, size_t n, int level, int* p_red_level)
 }
 
 void
-rbtree_build(RBTREE* tree, RBTREE_NODE** nodes, size_t n)
+rbtree_build(RBTree* tree, RBTreeNode** nodes, size_t n)
 {
     int red_level = 2 * 8 * sizeof(void*);
     tree->root = rbtree_build_recurse(nodes, n, 0, &red_level);
@@ -312,12 +312,12 @@ rbtree_build(RBTREE* tree, RBTREE_NODE** nodes, size_t n)
 
 
 static void
-rbtree_remove_fixup(RBTREE* tree, RBTREE_PATH* path)
+rbtree_remove_fixup(RBTree* tree, RBTreePath* path)
 {
-    RBTREE_NODE* node;
-    RBTREE_NODE* parent;
-    RBTREE_NODE* grandparent;
-    RBTREE_NODE* sibling;
+    RBTreeNode* node;
+    RBTreeNode* parent;
+    RBTreeNode* grandparent;
+    RBTreeNode* sibling;
 
     /* This function is called when a black node has been removed, so we
      * have to fix the black deficit on the provided path. */
@@ -392,12 +392,12 @@ rbtree_remove_fixup(RBTREE* tree, RBTREE_PATH* path)
     }
 }
 
-RBTREE_NODE*
-rbtree_remove(RBTREE* tree, const RBTREE_NODE* key)
+RBTreeNode*
+rbtree_remove(RBTree* tree, const RBTreeNode* key)
 {
-    RBTREE_PATH path;
-    RBTREE_NODE* node;
-    RBTREE_NODE* single_child;
+    RBTreePath path;
+    RBTreeNode* node;
+    RBTreeNode* single_child;
     int cmp;
 
     path.n = 0;
@@ -415,11 +415,11 @@ rbtree_remove(RBTREE* tree, const RBTREE_NODE* key)
      * another node, which is our direct successor; i.e. with the minimal
      * value of the right subtree (that one must be at he bottom). */
     if(RIGHT(node) != NULL) {
-        RBTREE_NODE* successor;
+        RBTreeNode* successor;
         int node_index = path.n - 1;
 
         if(LEFT(RIGHT(node)) != NULL) {
-            RBTREE_NODE* tmp;
+            RBTreeNode* tmp;
 
             rbtree_leftmost_path(RIGHT(node), &path);
             successor = path.path[path.n - 1];
@@ -493,10 +493,10 @@ rbtree_remove(RBTREE* tree, const RBTREE_NODE* key)
     return node;
 }
 
-RBTREE_NODE*
-rbtree_lookup(RBTREE* tree, const RBTREE_NODE* key)
+RBTreeNode*
+rbtree_lookup(RBTree* tree, const RBTreeNode* key)
 {
-    RBTREE_NODE* node = tree->root;
+    RBTreeNode* node = tree->root;
     int cmp;
 
     while(node != NULL) {
@@ -513,8 +513,8 @@ rbtree_lookup(RBTREE* tree, const RBTREE_NODE* key)
     return node;
 }
 
-RBTREE_NODE*
-rbtree_lookup_ex(RBTREE* tree, const RBTREE_NODE* key, RBTREE_CURSOR* cur)
+RBTreeNode*
+rbtree_lookup_ex(RBTree* tree, const RBTreeNode* key, RBTreeCursor* cur)
 {
     int cmp;
 
@@ -529,31 +529,31 @@ rbtree_lookup_ex(RBTREE* tree, const RBTREE_NODE* key, RBTREE_CURSOR* cur)
     return cur->path[cur->n - 1];
 }
 
-RBTREE_NODE*
-rbtree_current(RBTREE_CURSOR* cur)
+RBTreeNode*
+rbtree_current(RBTreeCursor* cur)
 {
     return (cur->n > 0) ? cur->path[cur->n - 1] : NULL;
 }
 
 
-RBTREE_NODE*
-rbtree_head(RBTREE* tree, RBTREE_CURSOR* cur)
+RBTreeNode*
+rbtree_head(RBTree* tree, RBTreeCursor* cur)
 {
     cur->n = 0;
     rbtree_leftmost_path(tree->root, cur);
     return (cur->n > 0) ? cur->path[cur->n - 1] : NULL;
 }
 
-RBTREE_NODE*
-rbtree_tail(RBTREE* tree, RBTREE_CURSOR* cur)
+RBTreeNode*
+rbtree_tail(RBTree* tree, RBTreeCursor* cur)
 {
     cur->n = 0;
     rbtree_rightmost_path(tree->root, cur);
     return (cur->n > 0) ? cur->path[cur->n - 1] : NULL;
 }
 
-RBTREE_NODE*
-rbtree_next(RBTREE_CURSOR* cur)
+RBTreeNode*
+rbtree_next(RBTreeCursor* cur)
 {
     if(cur->n > 0) {
         if(RIGHT(cur->path[cur->n - 1]) != NULL) {
@@ -575,8 +575,8 @@ rbtree_next(RBTREE_CURSOR* cur)
     return (cur->n > 0) ? cur->path[cur->n - 1] : NULL;
 }
 
-RBTREE_NODE*
-rbtree_prev(RBTREE_CURSOR* cur)
+RBTreeNode*
+rbtree_prev(RBTreeCursor* cur)
 {
     if(cur->n > 0) {
         if(LEFT(cur->path[cur->n - 1]) != NULL) {
@@ -604,10 +604,10 @@ rbtree_prev(RBTREE_CURSOR* cur)
 
 /* Returns black height of the tree, or -1 on an error. */
 static int
-rbtree_verify_recurse(RBTREE_NODE* node)
+rbtree_verify_recurse(RBTreeNode* node)
 {
-    RBTREE_NODE* children[2];
-    RBTREE_NODE* child;
+    RBTreeNode* children[2];
+    RBTreeNode* child;
     int child_height[2];
     int i;
 
@@ -641,7 +641,7 @@ rbtree_verify_recurse(RBTREE_NODE* node)
 
 /* Returns 0 if ok, or -1 on an error. */
 int
-rbtree_verify(RBTREE* tree)
+rbtree_verify(RBTree* tree)
 {
     /* Correct non-empty tree must have a black root. */
     if(tree->root != NULL  &&  IS_RED(tree->root))

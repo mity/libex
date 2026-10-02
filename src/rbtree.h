@@ -34,18 +34,6 @@ extern "C" {
 #include <stdlib.h>
 
 
-#if defined __cplusplus
-    #define RBTREE_INLINE__     inline
-#elif defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
-    #define RBTREE_INLINE__     static inline
-#elif defined __GNUC__
-    #define RBTREE_INLINE__     static __inline__
-#elif defined _MSC_VER
-    #define RBTREE_INLINE__     static __inline
-#else
-    #define RBTREE_INLINE__     static
-#endif
-
 #if defined offsetof
     #define RBTREE_OFFSETOF__(type, member)     offsetof(type, member)
 #elif defined __GNUC__ && __GNUC__ >= 4
@@ -61,9 +49,9 @@ extern "C" {
  * with the concept of red-black tree.
  *
  * To manipulate or query the tree, the tree as a whole is represented by the
- * RBTREE structure and its nodes are represented by the RBTREE_NODE structure.
+ * RBTree structure and its nodes are represented by the RBTreeNode structure.
  *
- * The word "intrusive" in the title means our RBTREE_NODE structure does not
+ * The word "intrusive" in the title means our RBTreeNode structure does not
  * hold any payload data on its own. Instead, you are supposed to embed the
  * node in your own data structure.
  *
@@ -97,18 +85,18 @@ extern "C" {
  *   which would make the comparator function order it differently with respect
  *   to other nodes in the tree.
  *
- * Note of warning: The RBTREE_NODE stores its color in the least significant
- * bit of the RBTREE_NODE::lc pointer. This means that all the RBTREE_NODE
+ * Note of warning: The RBTreeNode stores its color in the least significant
+ * bit of the RBTreeNode::lc pointer. This means that all the RBTreeNode
  * instances must be reasonably aligned.
  */
 
 
 /* Tree node structure. Treat as opaque.
  */
-typedef struct RBTREE_NODE {
-    struct RBTREE_NODE* lc; /* combination of left ptr and color bit */
-    struct RBTREE_NODE* r;  /* right ptr */
-} RBTREE_NODE;
+typedef struct RBTreeNode {
+    struct RBTreeNode* lc; /* combination of left ptr and color bit */
+    struct RBTreeNode* r;  /* right ptr */
+} RBTreeNode;
 
 
 /* Comparator function type.
@@ -120,20 +108,20 @@ typedef struct RBTREE_NODE {
  *   - positive value if the 1st argument is greater then the 2nd one;
  *   - zero if they are equal.
  */
-typedef int (*RBTREE_CMP_FUNC)(const RBTREE_NODE*, const RBTREE_NODE*);
+typedef int (*RBTreeCmpFunc)(const RBTreeNode*, const RBTreeNode*);
 
 
 /* Tree structure. Treat as opaque.
  */
-typedef struct RBTREE {
-    RBTREE_CMP_FUNC cmp_func;
-    RBTREE_NODE* root;
-} RBTREE;
+typedef struct RBTree {
+    RBTreeCmpFunc cmp_func;
+    RBTreeNode* root;
+} RBTree;
 
 
 /* Macro for getting pointer to the structure holding the rbtree node data.
  *
- * (If you use the RBTREE_NODE as the first member of your structure, you
+ * (If you use the RBTreeNode as the first member of your structure, you
  * can use a simple casting instead.)
  */
 #define RBTREE_DATA(node_ptr, type, member)     \
@@ -142,7 +130,7 @@ typedef struct RBTREE {
 
 /* The tree has to be initialized before it is used by any other function.
  */
-RBTREE_INLINE__ void rbtree_init(RBTREE* tree, RBTREE_CMP_FUNC cmp_func)
+static inline void rbtree_init(RBTree* tree, RBTreeCmpFunc cmp_func)
         { tree->cmp_func = cmp_func; tree->root = NULL; }
 
 #define RBTREE_INITIALIZER(cmp_func)    { cmp_func, NULL }
@@ -157,7 +145,7 @@ RBTREE_INLINE__ void rbtree_init(RBTREE* tree, RBTREE_CMP_FUNC cmp_func)
  *
  * ```
  * while(1) {
- *     RBTREE_NODE* node = rbtree_fini_step(tree);
+ *     RBTreeNode* node = rbtree_fini_step(tree);
  *     if(node == NULL)
  *         break;
  *
@@ -190,12 +178,12 @@ RBTREE_INLINE__ void rbtree_init(RBTREE* tree, RBTREE_CMP_FUNC cmp_func)
  * nodes when using this function. If we find more efficient algorithm for the
  * given purpose, future versions may traverse the nodes differently.)
  */
-RBTREE_NODE* rbtree_fini_step(RBTREE* tree);
+RBTreeNode* rbtree_fini_step(RBTree* tree);
 
 
 /* Check whether the tree is empty. Returns non-zero if empty, zero otherwise.
  */
-RBTREE_INLINE__ int rbtree_is_empty(const RBTREE* tree)
+static inline int rbtree_is_empty(const RBTree* tree)
         { return (tree->root == NULL); }
 
 
@@ -204,7 +192,7 @@ RBTREE_INLINE__ int rbtree_is_empty(const RBTREE* tree)
  * Returns 0 on success or -1 on failure (which may happen only if an equal
  * node is already present in the tree).
  */
-int rbtree_insert(RBTREE* tree, RBTREE_NODE* node);
+int rbtree_insert(RBTree* tree, RBTreeNode* node);
 
 /* Construct new tree from the provided nodes. Note the caller is responsible
  * for providing the node_array in the right order and that no two nodes may
@@ -214,7 +202,7 @@ int rbtree_insert(RBTREE* tree, RBTREE_NODE* node);
  * function my_cmp_func, calling the function is functionally equivalent to
  *
  * ```
- * void my_build(RBTREE* tree, const RBTREE_NODE** node_array, size_t n)
+ * void my_build(RBTree* tree, const RBTreeNode** node_array, size_t n)
  * {
  *     rbtree_init(tree);
  *     for(i = 0; i < n; i++)
@@ -227,7 +215,7 @@ int rbtree_insert(RBTREE* tree, RBTREE_NODE* node);
  * construction and that it results in optimally balanced tree (i.e. minimal
  * and maximal path lengths from root to any leaf differ by most by one.)
  */
-void rbtree_build(RBTREE* tree, RBTREE_NODE** nodes, size_t n);
+void rbtree_build(RBTree* tree, RBTreeNode** nodes, size_t n);
 
 
 /* Remove a node equal to the key (as defined by the comparator function).
@@ -235,14 +223,14 @@ void rbtree_build(RBTREE* tree, RBTREE_NODE** nodes, size_t n);
  * Returns pointer to the node disconnected from the tree (so that caller can
  * e.g. to destroy it), or NULL if no such item has been found in the tree.
  */
-RBTREE_NODE* rbtree_remove(RBTREE* tree, const RBTREE_NODE* key);
+RBTreeNode* rbtree_remove(RBTree* tree, const RBTreeNode* key);
 
 /* Find a node equal to the key (as defined by the comparator function).
  *
  * Returns pointer to the found node or NULL if no such node has been found in
  * the tree.
  */
-RBTREE_NODE* rbtree_lookup(RBTREE* tree, const RBTREE_NODE* key);
+RBTreeNode* rbtree_lookup(RBTree* tree, const RBTreeNode* key);
 
 
 /* The structure and functions below implement a walking over all nodes in the
@@ -251,10 +239,10 @@ RBTREE_NODE* rbtree_lookup(RBTREE* tree, const RBTREE_NODE* key);
  * The simple walking over the complete tree can be implemented as follows:
  *
  * ```
- * static void walk_over_my_tree(RBTREE* tree)
+ * static void walk_over_my_tree(RBTree* tree)
  * {
- *     RBTREE_CURSOR cur;
- *     RBTREE* node;
+ *     RBTreeCursor cur;
+ *     RBTree* node;
  *
  *     for(node = rbtree_head(tree, &cur);
  *         node != NULL;
@@ -268,14 +256,14 @@ RBTREE_NODE* rbtree_lookup(RBTREE* tree, const RBTREE_NODE* key);
  * However note any cursor becomes invalid and must not be used anymore when
  * any nodes are added into the tree or removed from it.
  */
-typedef struct RBTREE_CURSOR {
+typedef struct RBTreeCursor {
     /* The below is good enough to handle RB-trees of _any_ size. Consider size
      * of the address space in bytes cannot be larger than 2^(8*sizeof(void*)),
      * and that the longest root->leaf path of RB-tree is at most twice as long
      * as the shortest one. */
-    RBTREE_NODE* path[2 * 8 * sizeof(void*) - sizeof(RBTREE_NODE) + 1];
+    RBTreeNode* path[2 * 8 * sizeof(void*) - sizeof(RBTreeNode) + 1];
     unsigned n;
-} RBTREE_CURSOR;
+} RBTreeCursor;
 
 /* Initializer for a cursor pointing to nowhere. */
 #define RBTREE_CURSOR_INITIALIZER       { { 0 }, 0 }
@@ -286,12 +274,12 @@ typedef struct RBTREE_CURSOR {
  * (in the order as defined by the comparator function) via the rbtree_prev()
  * and/or rbtree_next().
  */
-RBTREE_NODE* rbtree_lookup_ex(RBTREE* tree, const RBTREE_NODE* key,
-                              RBTREE_CURSOR* cur);
+RBTreeNode* rbtree_lookup_ex(RBTree* tree, const RBTreeNode* key,
+                             RBTreeCursor* cur);
 
 /* Get the node corresponding to the current position of the cursor; or NULL.
  */
-RBTREE_NODE* rbtree_current(RBTREE_CURSOR* cur);
+RBTreeNode* rbtree_current(RBTreeCursor* cur);
 
 /* The functions rbtree_head() and rbtree_tail() retrieve the first or the last
  * node in the tree.
@@ -309,10 +297,10 @@ RBTREE_NODE* rbtree_current(RBTREE_CURSOR* cur);
  * points to the last node in the tree. Similarly, rbtree_prev() returns NULL
  * if the cursor already points to the 1st node in the tree.
  */
-RBTREE_NODE* rbtree_head(RBTREE* tree, RBTREE_CURSOR* cur);
-RBTREE_NODE* rbtree_tail(RBTREE* tree, RBTREE_CURSOR* cur);
-RBTREE_NODE* rbtree_next(RBTREE_CURSOR* cur);
-RBTREE_NODE* rbtree_prev(RBTREE_CURSOR* cur);
+RBTreeNode* rbtree_head(RBTree* tree, RBTreeCursor* cur);
+RBTreeNode* rbtree_tail(RBTree* tree, RBTreeCursor* cur);
+RBTreeNode* rbtree_next(RBTreeCursor* cur);
+RBTreeNode* rbtree_prev(RBTreeCursor* cur);
 
 
 #ifdef __cplusplus

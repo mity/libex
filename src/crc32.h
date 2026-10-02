@@ -2,7 +2,7 @@
  * libex
  * <http://github.com/mity/libex>
  *
- * Copyright (c) 2016-2026 Martin Mitáš
+ * Copyright (c) 2017-2026 Martin Mitáš
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -23,8 +23,8 @@
  * IN THE SOFTWARE.
  */
 
-#ifndef EX_FNV1A64_H
-#define EX_FNV1A64_H
+#ifndef EX_CRC32_H
+#define EX_CRC32_H
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -34,39 +34,33 @@ extern "C" {
 #endif
 
 
-#if defined __cplusplus
-    #define FNV1A64_INLINE__    inline
-#elif defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
-    #define FNV1A64_INLINE__    static inline
-#elif defined __GNUC__
-    #define FNV1A64_INLINE__    static __inline__
-#elif defined _MSC_VER
-    #define FNV1A64_INLINE__    static __inline
-#else
-    #define FNV1A64_INLINE__    static
-#endif
-
-
-/* 64-bit Fowler-Noll-Vo hash implementation.
- * (http://www.isthe.com/chongo/tech/comp/fnv/)
+/*
+ * Compute CRC-32 of the given data.
  *
- * We implement 1a variant of the function as it is generally recommended
- * and preferred over the original variant 1.
+ * Note there is no real CRC-32 standard and the ecosystem is quite messy
+ * (see e.g. https://zlib.net/crc_v3.txt).
+ *
+ * This implementation is based on the appendix A.3 of the paper
+ * http://stigge.org/martin/pub/SAR-PR-2006-05.pdf
+ *
+ * This variant is sometimes also referred to as CRC-32/ISO-HDLC, CRC-32/ADCCP,
+ * CRC-32/V-42, CRC-32/XZ, or PKZIP's CRC32.
  */
 
-#define FNV1A_64_INIT       ((uint64_t)14695981039346656037U)
+/* Use these for hashing per-partes */
+static inline uint32_t crc32_beg(void)
+    { return 0xffffffffU; }
+uint32_t crc32_part(uint32_t crc, const void* data, size_t n);
+static inline uint32_t crc32_end(uint32_t crc)
+    { return crc ^ 0xffffffffU; }
 
-FNV1A64_INLINE__ uint64_t fnv1a_64_beg(void)
-    { return FNV1A_64_INIT; }
-uint64_t fnv1a_64_part(uint64_t fnv1a, const void* data, size_t n);
 
-
-FNV1A64_INLINE__ uint64_t fnv1a_64(const void* data, size_t n)
-    { return fnv1a_64_part(FNV1A_64_INIT, data, n); }
+static inline uint32_t crc32(const void* data, size_t n)
+    { uint32_t crc; crc = crc32_part(0xffffffffU, data, n); return crc ^ 0xffffffffU; }
 
 
 #ifdef __cplusplus
 }  /* extern "C" { */
 #endif
 
-#endif  /* EX_FNV1A64_H */
+#endif  /* EX_CRC32_H */

@@ -26,6 +26,7 @@
 #ifndef EX_DEFS_H
 #define EX_DEFS_H
 
+#include <stddef.h>
 #include <stdlib.h>
 
 
@@ -144,6 +145,78 @@
 #ifndef STRINGIZE
     #define STRINGIZE_HELPER__(a)   #a
     #define STRINGIZE(a)            STRINGIZE_HELPER__(a)
+#endif
+
+
+/* Some compilers emit by default warnings when they encounter switch branch
+ * which does not end with 'break'. This macro can be used to explicitly inform
+ * the compiler that it's intentional.
+ */
+#ifndef FALLTHOUGH
+    #if defined __STDC_VERSION__  &&  __STDC_VERSION__ >= 202311
+        #define FALLTHROUGH()       [[fallthrough]]
+    #elif defined __clang__ && __clang_major__ >= 12
+        #define FALLTHROUGH()       __attribute__((fallthrough))
+    #elif defined __GNUC__ && __GNUC__ >= 7
+        #define FALLTHROUGH()       __attribute__((fallthrough))
+    #else
+        #define FALLTHROUGH()       do {} while(0)
+    #endif
+#endif
+
+
+/* <assert.h> by default enables the assertions even for release or production
+ * code. But especially for a lot of code it makes a good sense to have a macro
+ * assertion which is by default enabled in an explicit debug build; and in
+ * release builds a noop or even use the provided invariant as a potentially
+ * valuable hint to the optimizer.
+ *
+ * Caution: If the invariant provided by the caller shows false in a non-debug
+ * build, an undefined behavior follows.
+ */
+#ifndef ASSERT
+    #if defined DEBUG  ||  defined ENABLE_ASSERTIONS
+        #include <assert.h>
+        #define ASSERT(x)           assert(x)
+    #elif defined __STDC_VERSION__  &&  __STDC_VERSION__ >= 202311
+        #define ASSERT(x)           do { if(!(x)) unreachable(); } while(0)
+    #elif defined __GNUC__
+        #define ASSERT(x)           do { if(!(x)) __builtin_unreachable(); } while(0)
+    #elif defined __clang__
+        #define ASSERT(x)           do { if(!(x)) __builtin_unreachable(); } while(0)
+    #elif defined _MSC_VER  &&  _MSC_VER > 120
+        #define ASSERT(x)           __assume(x)
+    #else
+        #define ASSERT(x)           do {} while(0)
+    #endif
+#endif
+
+
+/* A macro to declare that the given code branch is unreachable.
+ *
+ * In a debug build, reaching the point will be treated as a failed assertion
+ * (i.e. the program aborted); in release builds the knowledge may be used by
+ * the compiler as a hint for optimizer that the given is never executed
+ *
+ * Caution: If the program does take it in a release build, an undefined
+ * behavior follows.
+ */
+#ifndef UNREACHABLE
+    #if defined DEBUG  ||  defined ENABLE_ASSERTIONS
+        #define UNREACHABLE         ASSERT(0)
+    #elif defined __STDC_VERSION__  &&  __STDC_VERSION__ >= 202311
+        #define UNREACHABLE         unreachable()
+    #else
+        #define UNREACHABLE         ASSERT(0)
+    #endif
+#endif
+
+
+/* A macro to declare the given variable/function argument may not be used,
+ * in order to suppress compiler warning.
+ */
+#ifndef UNUSED
+    #define UNUSED(x)               ((void)(x))
 #endif
 
 

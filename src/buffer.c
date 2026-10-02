@@ -28,7 +28,7 @@
 
 
 int
-buffer_realloc(BUFFER* buf, size_t alloc)
+buffer_realloc(Buffer* buf, size_t alloc)
 {
     void* tmp;
 
@@ -53,7 +53,7 @@ buffer_realloc(BUFFER* buf, size_t alloc)
 }
 
 int
-buffer_reserve(BUFFER* buf, size_t n)
+buffer_reserve(Buffer* buf, size_t n)
 {
     size_t alloc;
 
@@ -67,7 +67,7 @@ buffer_reserve(BUFFER* buf, size_t n)
 }
 
 void
-buffer_shrink(BUFFER* buf)
+buffer_shrink(Buffer* buf)
 {
     /* Avoid realloc() if the potential memory gain is negligible. */
     if((0 < buf->alloc && buf->alloc < 8)  ||  buf->alloc / 8 < buf->size / 7)
@@ -77,7 +77,7 @@ buffer_shrink(BUFFER* buf)
 }
 
 void*
-buffer_insert_raw(BUFFER* buf, size_t off, size_t n)
+buffer_insert_raw(Buffer* buf, size_t off, size_t n)
 {
     if(buf->size + n > buf->alloc) {
         if(buffer_reserve(buf, n) != 0)
@@ -92,7 +92,7 @@ buffer_insert_raw(BUFFER* buf, size_t off, size_t n)
 }
 
 int
-buffer_insert(BUFFER* buf, size_t off, const void* data, size_t n)
+buffer_insert(Buffer* buf, size_t off, const void* data, size_t n)
 {
     void* ptr;
 
@@ -105,7 +105,7 @@ buffer_insert(BUFFER* buf, size_t off, const void* data, size_t n)
 }
 
 void
-buffer_remove(BUFFER* buf, size_t off, size_t n)
+buffer_remove(Buffer* buf, size_t off, size_t n)
 {
     if(off + n < buf->size) {
         memmove((uint8_t*)buf->data + off, (uint8_t*)buf->data + off + n, buf->size - off - n);

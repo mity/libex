@@ -56,18 +56,18 @@ extern "C" {
  */
 
 
-#define MEMCHUNK_DEFAULT_BLOCK_SIZE     1024
+#define MEMCHUNK_DEFAULT_BLOCK_SIZE     4096
 
 
-typedef struct MEMCHUNK_BLOCK MEMCHUNK_BLOCK;
+typedef struct MemChunkBlock MemChunkBlock;
 
 
 /* The allocator structure. Treat as opaque. */
-typedef struct MEMCHUNK {
-    MEMCHUNK_BLOCK* head;
+typedef struct MemChunk {
+    MemChunkBlock* head;
     size_t block_size;
     size_t free_off;
-} MEMCHUNK;
+} MemChunk;
 
 
 #define MEMCHUNK_INITIALIZER(block_size)                                \
@@ -77,20 +77,20 @@ typedef struct MEMCHUNK {
 /* Initialize the chunk allocator.
  *
  * The block_size specifies the size of the larger blocks allocated under the
- * hood. Using zero means a default block size (currently 1 kB).
+ * hood. Using zero means a default block size (currently 4 kB).
  */
-void memchunk_init(MEMCHUNK* chunk, size_t block_size);
+void memchunk_init(MemChunk* chunk, size_t block_size);
 
 /* Allocate a (small) memory from the chunk allocator.
  *
  * It will only be released when memchunk_fini() is called (alongside all other
  * memory pieces allocated by the same allocator).
  */
-void* memchunk_alloc(MEMCHUNK* chunk, size_t size);
+void* memchunk_alloc(MemChunk* chunk, size_t size);
 
 /* Free all the memory used by the given chunk allocator.
  */
-void memchunk_fini(MEMCHUNK* chunk);
+void memchunk_fini(MemChunk* chunk);
 
 
 #ifdef __cplusplus

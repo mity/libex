@@ -31,17 +31,17 @@
  *** Doubly-linked list ***
  **************************/
 
-typedef struct DATA {
+typedef struct Data {
     int value;
-    LIST_NODE list_node;
-} DATA;
+    ListNode list_node;
+} Data;
 
-static DATA*
+static Data*
 alloc_data(int value)
 {
-    DATA* d;
+    Data* d;
 
-    d = (DATA*) malloc(sizeof(DATA));
+    d = (Data*) malloc(sizeof(Data));
     TEST_CHECK(d != NULL);
     d->value = value;
     return d;
@@ -51,8 +51,8 @@ alloc_data(int value)
 static void
 test_list_empty(void)
 {
-    LIST list;
-    LIST_NODE node;
+    List list;
+    ListNode node;
 
     list_init(&list);
 
@@ -64,9 +64,9 @@ test_list_empty(void)
 static void
 test_list_iterate(void)
 {
-    LIST list;
-    LIST_NODE* node;
-    DATA* data;
+    List list;
+    ListNode* node;
+    Data* data;
     int n;
 
     /* Create simple list. */
@@ -77,13 +77,13 @@ test_list_iterate(void)
 
     /* Iterate forward. */
     for(node = list_head(&list), n = 1; node != list_end(&list); node = list_next(node), n++) {
-        data = LIST_DATA(node, DATA, list_node);
+        data = LIST_DATA(node, Data, list_node);
         TEST_CHECK(data->value == n);
     }
 
     /* Iterate backward. */
     for(node = list_tail(&list), n = 3; node != list_end(&list); node = list_prev(node), n--) {
-        data = LIST_DATA(node, DATA, list_node);
+        data = LIST_DATA(node, Data, list_node);
         TEST_CHECK(data->value == n);
     }
 
@@ -92,7 +92,7 @@ test_list_iterate(void)
     while(!list_is_empty(&list)) {
         node = list_head(&list);
         list_remove(&list, node);
-        free(LIST_DATA(node, DATA, list_node));
+        free(LIST_DATA(node, Data, list_node));
         n++;
     }
     TEST_CHECK(n == 3);
@@ -101,10 +101,10 @@ test_list_iterate(void)
 static void
 test_list_insert(void)
 {
-    LIST list;
-    LIST_NODE* node;
-    DATA* data;
-    DATA xxx;
+    List list;
+    ListNode* node;
+    Data* data;
+    Data xxx;
     int n;
 
     /* Create simple list. */
@@ -127,13 +127,13 @@ test_list_insert(void)
 
     /* Iterate forward. */
     for(node = list_head(&list), n = 1; node != list_end(&list); node = list_next(node), n++) {
-        data = LIST_DATA(node, DATA, list_node);
+        data = LIST_DATA(node, Data, list_node);
         TEST_CHECK(data->value == n);
     }
 
     /* Iterate backward. */
     for(node = list_tail(&list), n = 6; node != list_end(&list); node = list_prev(node), n--) {
-        data = LIST_DATA(node, DATA, list_node);
+        data = LIST_DATA(node, Data, list_node);
         TEST_CHECK(data->value == n);
     }
 
@@ -142,7 +142,7 @@ test_list_insert(void)
     while(!list_is_empty(&list)) {
         node = list_head(&list);
         list_remove(&list, node);
-        free(LIST_DATA(node, DATA, list_node));
+        free(LIST_DATA(node, Data, list_node));
         n++;
     }
     TEST_CHECK(n == 6);
@@ -153,17 +153,17 @@ test_list_insert(void)
  *** Single linked list ***
  **************************/
 
-typedef struct SDATA {
+typedef struct SData {
     int value;
-    SLIST_NODE list_node;
-} SDATA;
+    SListNode list_node;
+} SData;
 
-static SDATA*
+static SData*
 alloc_sdata(int value)
 {
-    SDATA* d;
+    SData* d;
 
-    d = (SDATA*) malloc(sizeof(SDATA));
+    d = (SData*) malloc(sizeof(SData));
     TEST_CHECK(d != NULL);
     d->value = value;
     return d;
@@ -173,8 +173,8 @@ alloc_sdata(int value)
 static void
 test_slist_empty(void)
 {
-    SLIST list;
-    SLIST_NODE node;
+    SList list;
+    SListNode node;
 
     slist_init(&list);
 
@@ -186,9 +186,9 @@ test_slist_empty(void)
 static void
 test_slist_iterate(void)
 {
-    SLIST list;
-    SLIST_NODE* node;
-    SDATA* data;
+    SList list;
+    SListNode* node;
+    SData* data;
     int n;
 
     /* Create simple list. */
@@ -199,7 +199,7 @@ test_slist_iterate(void)
 
     /* Iterate forward. */
     for(node = slist_head(&list), n = 1; node != slist_end(&list); node = slist_next(node), n++) {
-        data = SLIST_DATA(node, SDATA, list_node);
+        data = SLIST_DATA(node, SData, list_node);
         TEST_CHECK(data->value == n);
     }
 
@@ -208,7 +208,7 @@ test_slist_iterate(void)
     while(!slist_is_empty(&list)) {
         node = slist_head(&list);
         slist_remove_head(&list);
-        free(SLIST_DATA(node, SDATA, list_node));
+        free(SLIST_DATA(node, SData, list_node));
         n++;
     }
     TEST_CHECK(n == 3);
@@ -217,10 +217,10 @@ test_slist_iterate(void)
 static void
 test_slist_insert(void)
 {
-    SLIST list;
-    SLIST_NODE* node;
-    SDATA* data;
-    SDATA xxx;
+    SList list;
+    SListNode* node;
+    SData* data;
+    SData xxx;
     int n;
 
     /* Create simple list. */
@@ -240,7 +240,7 @@ test_slist_insert(void)
 
     /* Iterate forward. */
     for(node = slist_head(&list), n = 1; node != slist_end(&list); node = slist_next(node), n++) {
-        data = SLIST_DATA(node, SDATA, list_node);
+        data = SLIST_DATA(node, SData, list_node);
         TEST_CHECK(data->value == n);
     }
 
@@ -249,7 +249,7 @@ test_slist_insert(void)
     while(!slist_is_empty(&list)) {
         node = slist_head(&list);
         slist_remove_head(&list);
-        free(SLIST_DATA(node, SDATA, list_node));
+        free(SLIST_DATA(node, SData, list_node));
         n++;
     }
     TEST_CHECK(n == 5);
@@ -260,17 +260,17 @@ test_slist_insert(void)
  *** Queue ***
  *************/
 
-typedef struct QDATA {
+typedef struct QData {
     int value;
-    QLIST_NODE list_node;
-} QDATA;
+    QListNode list_node;
+} QData;
 
-static QDATA*
+static QData*
 alloc_qdata(int value)
 {
-    QDATA* d;
+    QData* d;
 
-    d = (QDATA*) malloc(sizeof(QDATA));
+    d = (QData*) malloc(sizeof(QData));
     TEST_CHECK(d != NULL);
     d->value = value;
     return d;
@@ -280,8 +280,8 @@ alloc_qdata(int value)
 static void
 test_qlist_empty(void)
 {
-    QLIST list;
-    QLIST_NODE node;
+    QList list;
+    QListNode node;
 
     qlist_init(&list);
 
@@ -293,9 +293,9 @@ test_qlist_empty(void)
 static void
 test_qlist_iterate(void)
 {
-    QLIST list;
-    QLIST_NODE* node;
-    QDATA* data;
+    QList list;
+    QListNode* node;
+    QData* data;
     int n;
 
     /* Create simple list. */
@@ -306,7 +306,7 @@ test_qlist_iterate(void)
 
     /* Iterate forward. */
     for(node = qlist_head(&list), n = 1; node != qlist_end(&list); node = qlist_next(node), n++) {
-        data = QLIST_DATA(node, QDATA, list_node);
+        data = QLIST_DATA(node, QData, list_node);
         TEST_CHECK(data->value == n);
     }
 
@@ -315,7 +315,7 @@ test_qlist_iterate(void)
     while(!qlist_is_empty(&list)) {
         node = qlist_head(&list);
         qlist_remove_head(&list);
-        free(QLIST_DATA(node, QDATA, list_node));
+        free(QLIST_DATA(node, QData, list_node));
         n++;
     }
     TEST_CHECK(n == 3);
@@ -324,10 +324,10 @@ test_qlist_iterate(void)
 static void
 test_qlist_insert(void)
 {
-    QLIST list;
-    QLIST_NODE* node;
-    QDATA* data;
-    QDATA xxx;
+    QList list;
+    QListNode* node;
+    QData* data;
+    QData xxx;
     int n;
 
     /* Create simple list. */
@@ -348,7 +348,7 @@ test_qlist_insert(void)
 
     /* Iterate forward. */
     for(node = qlist_head(&list), n = 1; node != qlist_end(&list); node = qlist_next(node), n++) {
-        data = QLIST_DATA(node, QDATA, list_node);
+        data = QLIST_DATA(node, QData, list_node);
         TEST_CHECK(data->value == n);
     }
 
@@ -357,7 +357,7 @@ test_qlist_insert(void)
     while(!qlist_is_empty(&list)) {
         node = qlist_head(&list);
         qlist_remove_head(&list);
-        free(QLIST_DATA(node, QDATA, list_node));
+        free(QLIST_DATA(node, QData, list_node));
         n++;
     }
     TEST_CHECK(n == 6);

@@ -77,12 +77,12 @@ extern "C" {
 #define CMDLINE_OPTID_BOGUSARG          (-0x7fffffff + 2)
 
 
-typedef struct CMDLINE_OPTION {
+typedef struct CmdlineOption {
     char shortname;         /* Short (single char) option or 0. */
     const char* longname;   /* Long name (after "--") or NULL. */
     int id;                 /* Non-zero ID to identify the option in the callback; or zero to denote end of options list. */
     unsigned flags;         /* Bitmask of CMDLINE_OPTFLAG_xxxx flags. */
-} CMDLINE_OPTION;
+} CmdlineOption;
 
 
 /* Parses all options and their arguments as specified by argc, argv accordingly
@@ -140,7 +140,7 @@ typedef struct CMDLINE_OPTION {
  * cmdline_read() propagates the same return value to the caller.
  */
 
-int cmdline_read(const CMDLINE_OPTION* options, int argc, char** argv,
+int cmdline_read(const CmdlineOption* options, int argc, char** argv,
         int (*callback)(int /*id*/, const char* /*arg*/, void* /*userdata*/),
         void* userdata);
 

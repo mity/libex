@@ -33,7 +33,7 @@
 static void
 test_alloc_small(void)
 {
-    MEMCHUNK chunk = MEMCHUNK_INITIALIZER(0);
+    MemChunk chunk = MEMCHUNK_INITIALIZER(0);
     void* prev_ptr = NULL;
     void* ptr;
     int i;
@@ -53,7 +53,7 @@ test_alloc_small(void)
 static void
 test_alloc_big(void)
 {
-    MEMCHUNK chunk = MEMCHUNK_INITIALIZER(0);
+    MemChunk chunk = MEMCHUNK_INITIALIZER(0);
     void* prev_ptr = NULL;
     void* ptr;
     int i;

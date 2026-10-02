@@ -36,16 +36,6 @@
 
 #include "murmur3_32.h"
 
-#if defined __GNUC__ || defined(__clang__)
-    #define INLINE__            __inline__ __attribute__((always_inline))
-#elif defined _MSC_VER
-    #define INLINE__            __forceinline
-#elif defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
-    #define INLINE__            inline
-#else
-    #define INLINE__
-#endif
-
 
 #if defined __STDC_VERSION__ && __STDC_VERSION__ >= 202311L
     #define FALLTHOUGH          [[fallthrough]]

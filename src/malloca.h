@@ -38,18 +38,6 @@
     #define EX_func_alloca__ alloca
 #endif
 
-#if defined __cplusplus
-    #define MALLOCA_INLINE__    inline
-#elif defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
-    #define MALLOCA_INLINE__    static inline
-#elif defined __GNUC__
-    #define MALLOCA_INLINE__    static __inline__
-#elif defined _MSC_VER
-    #define MALLOCA_INLINE__    static __inline
-#else
-    #define MALLOCA_INLINE__    static
-#endif
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,7 +53,7 @@ extern "C" {
 
 
 /* Helper. Do not use directly. */
-MALLOCA_INLINE__ void*
+static inline void*
 malloca_init__(void* ptr, int mark)
 {
     if(ptr != NULL) {

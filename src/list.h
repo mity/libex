@@ -31,18 +31,6 @@ extern "C" {
 #endif
 
 
-#if defined __cplusplus
-    #define LIST_INLINE__       inline
-#elif defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
-    #define LIST_INLINE__       static inline
-#elif defined __GNUC__
-    #define LIST_INLINE__       static __inline__
-#elif defined _MSC_VER
-    #define LIST_INLINE__       static __inline
-#else
-    #define LIST_INLINE__       static
-#endif
-
 #if defined offsetof
     #define LIST_OFFSETOF__(type, member)   offsetof(type, member)
 #elif defined __GNUC__ && __GNUC__ >= 4
@@ -54,12 +42,12 @@ extern "C" {
 
 /* This header implements few simple intrusive linked lists:
  *
- *  - Double-linked lists (LIST)
- *  - Single-linked lists (SLIST)
- *  - Single-linked lists which also the tail, aka queue (QLIST)
+ *  - Double-linked lists (List)
+ *  - Single-linked lists (SList)
+ *  - Single-linked lists which also the tail, aka queue (QList)
  *
- * The word intrusive means our node structures (LIST_NODE, SLIST_NODE or
- * QLIST_NODE) don't hold any data on their own. Instead, you are supposed to
+ * The word intrusive means our node structures (ListNode, SListNode or
+ * QListNode) don't hold any data on their own. Instead, you are supposed to
  * embed them in your structure.
  *
  * Given the simplicity of all operations, all functions are inline.
@@ -69,7 +57,7 @@ extern "C" {
  * linked list and slist_next() in single-linked list.
  *
  * For all the manipulations with the lists, you are supposed to use pointer
- * to our node structures (LIST_NODE, SLIST_NODE or QLIST_NODE). To retrieve
+ * to our node structures (ListNode, SListNode or QListNode). To retrieve
  * the payload data, use the macro LIST_DATA, SLIST_DATA or QUEUE_DATA as
  * appropriate (all of these are actually just a synonym for the wildly used
  * container_of() macro.)
@@ -92,21 +80,21 @@ extern "C" {
  *    ...   // Some data
  *
  *    // The embedded list node structure:
- *    LIST_NODE list_node;
+ *    ListNode ListNode;
  *
  *    ...   // Some more data
  * } MyStruct;
  *
  *
  * static void
- * walk_my_list(LIST* list)
+ * walk_my_list(List* list)
  * {
- *     LIST_NODE* node;
+ *     ListNode* node;
  *     MyStruct* data_payload;
  *
  *     for(node = list_head(list); node != list_end(list); node = list_next(node)) {
  *         // Retrieve the data pay load from the node:
- *         data_payload = LIST_DATA(node, MyStruct, list_node);
+ *         data_payload = LIST_DATA(node, MyStruct, ListNode);
  *
  *         // Process the data payload as desired.
  *         ...
@@ -116,7 +104,7 @@ extern "C" {
  *
  * An overview of available operations, depending on the list type:
  *
- *                              | LIST   | SLIST  | QLIST
+ *                              | List   | SList  | QList
  * -----------------------------|--------|--------|-------
  * <listtype>_init()            | yes    | yes    | yes
  * <listtype>_is_empty()        | yes    | yes    | yes
@@ -139,22 +127,22 @@ extern "C" {
 
 
 /*********************************
- *** LIST (doubly linked list) ***
+ *** List (doubly linked list) ***
  *********************************/
 
 /* List node structure. Treat as opaque.
  */
-typedef struct LIST_NODE {
-    struct LIST_NODE* p;    /* prev */
-    struct LIST_NODE* n;    /* next */
-} LIST_NODE;
+typedef struct ListNode {
+    struct ListNode* p;    /* prev */
+    struct ListNode* n;    /* next */
+} ListNode;
 
 
 /* List structure. Treat as opaque.
  */
-typedef struct LIST {
-    struct LIST_NODE main;
-} LIST;
+typedef struct List {
+    struct ListNode main;
+} List;
 
 
 /* Macro for getting pointer to the structure holding list node data.
@@ -165,23 +153,23 @@ typedef struct LIST {
 
 /* The list has to be initialized before it is used by any other function.
  */
-LIST_INLINE__ void list_init(LIST* list)
+static inline void list_init(List* list)
         { list->main.p = list->main.n = &list->main; }
 
 
 /* Check whether the list is empty or not.
  */
-LIST_INLINE__ int list_is_empty(const LIST* list)
+static inline int list_is_empty(const List* list)
         { return (list->main.n == &list->main); }
 
 
 /* Iterating the list.
  */
-LIST_INLINE__ LIST_NODE* list_head(const LIST* list)        { return list->main.n; }
-LIST_INLINE__ LIST_NODE* list_tail(const LIST* list)        { return list->main.p; }
-LIST_INLINE__ LIST_NODE* list_prev(const LIST_NODE* node)   { return node->p; }
-LIST_INLINE__ LIST_NODE* list_next(const LIST_NODE* node)   { return node->n; }
-LIST_INLINE__ const LIST_NODE* list_end(const LIST* list)   { return &list->main; }
+static inline ListNode* list_head(const List* list)         { return list->main.n; }
+static inline ListNode* list_tail(const List* list)         { return list->main.p; }
+static inline ListNode* list_prev(const ListNode* node)     { return node->p; }
+static inline ListNode* list_next(const ListNode* node)     { return node->n; }
+static inline const ListNode* list_end(const List* list)    { return &list->main; }
 
 /* Add the given node into the list.
  *
@@ -189,41 +177,41 @@ LIST_INLINE__ const LIST_NODE* list_end(const LIST* list)   { return &list->main
  * attempt to add the node into multiple lists (or multiple times into the
  * same list), the result is undefined.
  */
-LIST_INLINE__ void list_insert_after(LIST* list, LIST_NODE* node_where, LIST_NODE* node)
+static inline void list_insert_after(ListNode* node_where, ListNode* node)
         { node->p = node_where; node->n = node_where->n; node_where->n = node; node->n->p = node; }
-LIST_INLINE__ void list_insert_before(LIST* list, LIST_NODE* node_where, LIST_NODE* node)
+static inline void list_insert_before(ListNode* node_where, ListNode* node)
         { node->p = node_where->p; node->n = node_where; node_where->p = node; node->p->n = node; }
-LIST_INLINE__ void list_append(LIST* list, LIST_NODE* node)
-        { list_insert_before(list, &list->main, node); }
-LIST_INLINE__ void list_prepend(LIST* list, LIST_NODE* node)
-        { list_insert_after(list, &list->main, node); }
+static inline void list_append(List* list, ListNode* node)
+        { list_insert_before(&list->main, node); }
+static inline void list_prepend(List* list, ListNode* node)
+        { list_insert_after(&list->main, node); }
 
 /* Disconnect the given node from its list.
  */
-LIST_INLINE__ void list_remove(LIST* list, LIST_NODE* node)
-        { node->p->n = node->n; node->n->p = node->p; }
-LIST_INLINE__ void list_remove_head(LIST* list)
+static inline void list_remove(List* list, ListNode* node)
+        { ((void) list); node->p->n = node->n; node->n->p = node->p; }
+static inline void list_remove_head(List* list)
         { list_remove(list, list->main.n); }
-LIST_INLINE__ void list_remove_tail(LIST* list)
+static inline void list_remove_tail(List* list)
         { list_remove(list, list->main.p); }
 
 
 /**********************************
- *** SLIST (single-linked list) ***
+ *** SList (single-linked list) ***
  **********************************/
 
 /* List node structure. Treat as opaque.
  */
-typedef struct SLIST_NODE {
-    struct SLIST_NODE* n;       /* next */
-} SLIST_NODE;
+typedef struct SListNode {
+    struct SListNode* n;       /* next */
+} SListNode;
 
 
 /* List structure. Treat as opaque.
  */
-typedef struct SLIST {
-    struct SLIST_NODE main;
-} SLIST;
+typedef struct SList {
+    struct SListNode main;
+} SList;
 
 
 /* Macro for getting pointer to the structure holding list node data.
@@ -234,21 +222,21 @@ typedef struct SLIST {
 
 /* The list has to be initialized before it is used by any other function.
  */
-LIST_INLINE__ void slist_init(SLIST* list)
+static inline void slist_init(SList* list)
         { list->main.n = &list->main; }
 
 
 /* Check whether the list is empty or not.
  */
-LIST_INLINE__ int slist_is_empty(const SLIST* list)
+static inline int slist_is_empty(const SList* list)
         { return (list->main.n == &list->main); }
 
 
 /* Iterating the list.
  */
-LIST_INLINE__ SLIST_NODE* slist_head(const SLIST* list)         { return list->main.n; }
-LIST_INLINE__ SLIST_NODE* slist_next(const SLIST_NODE* node)    { return node->n; }
-LIST_INLINE__ const SLIST_NODE* slist_end(const SLIST* list)    { return &list->main; }
+static inline SListNode* slist_head(const SList* list)         { return list->main.n; }
+static inline SListNode* slist_next(const SListNode* node)    { return node->n; }
+static inline const SListNode* slist_end(const SList* list)    { return &list->main; }
 
 /* Add the given node into the list.
  *
@@ -256,36 +244,36 @@ LIST_INLINE__ const SLIST_NODE* slist_end(const SLIST* list)    { return &list->
  * attempt to add the node into multiple lists (or multiple times into the
  * same list), the result is undefined.
  */
-LIST_INLINE__ void slist_insert_after(SLIST* list, SLIST_NODE* node_where, SLIST_NODE* node)
+static inline void slist_insert_after(SListNode* node_where, SListNode* node)
         { node->n = node_where->n; node_where->n = node; }
-LIST_INLINE__ void slist_prepend(SLIST* list, SLIST_NODE* node)
-        { slist_insert_after(list, &list->main, node); }
+static inline void slist_prepend(SList* list, SListNode* node)
+        { slist_insert_after(&list->main, node); }
 
 /* Disconnect the given node from its list.
  */
-LIST_INLINE__ void slist_remove(SLIST* list, SLIST_NODE* node_prev, SLIST_NODE* node)
+static inline void slist_remove(SListNode* node_prev, SListNode* node)
         { node_prev->n = node->n; }
-LIST_INLINE__ void slist_remove_head(SLIST* list)
-        { slist_remove(list, &list->main, list->main.n); }
+static inline void slist_remove_head(SList* list)
+        { slist_remove(&list->main, list->main.n); }
 
 
 /*****************************************************
- *** QLIST (queue or single-linked list with tail) ***
+ *** QList (queue or single-linked list with tail) ***
  *****************************************************/
 
 /* List node structure. Treat as opaque.
  */
-typedef struct QLIST_NODE {
-    struct QLIST_NODE* n;       /* next */
-} QLIST_NODE;
+typedef struct QListNode {
+    struct QListNode* n;       /* next */
+} QListNode;
 
 
 /* List structure. Treat as opaque.
  */
-typedef struct QLIST {
-    struct QLIST_NODE main;
-    struct QLIST_NODE* tail;
-} QLIST;
+typedef struct QList {
+    struct QListNode main;
+    struct QListNode* tail;
+} QList;
 
 
 /* Macro for getting pointer to the structure holding list node data.
@@ -295,20 +283,20 @@ typedef struct QLIST {
 
 /* The list has to be initialized before it is used by any other function.
  */
-LIST_INLINE__ void qlist_init(QLIST* list)
+static inline void qlist_init(QList* list)
         { list->tail = list->main.n = &list->main; }
 
 /* Check whether the list is empty or not.
  */
-LIST_INLINE__ int qlist_is_empty(const QLIST* list)
+static inline int qlist_is_empty(const QList* list)
         { return (list->main.n == &list->main); }
 
 /* Iterating the list.
  */
-LIST_INLINE__ QLIST_NODE* qlist_head(const QLIST* list)         { return list->main.n; }
-LIST_INLINE__ QLIST_NODE* qlist_tail(const QLIST* list)         { return list->tail; }
-LIST_INLINE__ QLIST_NODE* qlist_next(const QLIST_NODE* node)    { return node->n; }
-LIST_INLINE__ const QLIST_NODE* qlist_end(const QLIST* list)    { return &list->main; }
+static inline QListNode* qlist_head(const QList* list)         { return list->main.n; }
+static inline QListNode* qlist_tail(const QList* list)         { return list->tail; }
+static inline QListNode* qlist_next(const QListNode* node)    { return node->n; }
+static inline const QListNode* qlist_end(const QList* list)    { return &list->main; }
 
 /* Add the given node into the list.
  *
@@ -316,20 +304,20 @@ LIST_INLINE__ const QLIST_NODE* qlist_end(const QLIST* list)    { return &list->
  * attempt to add the node into multiple lists (or multiple times into the
  * same list), the result is undefined.
  */
-LIST_INLINE__ void qlist_insert_after(QLIST* list, QLIST_NODE* node_where, QLIST_NODE* node)
+static inline void qlist_insert_after(QList* list, QListNode* node_where, QListNode* node)
         { node->n = node_where->n; node_where->n = node;
           if(list->tail == node_where) list->tail = node; }
-LIST_INLINE__ void qlist_append(QLIST* list, QLIST_NODE* node)
+static inline void qlist_append(QList* list, QListNode* node)
         { node->n = &list->main; list->tail->n = node; list->tail = node; }
-LIST_INLINE__ void qlist_prepend(QLIST* list, QLIST_NODE* node)
+static inline void qlist_prepend(QList* list, QListNode* node)
         { qlist_insert_after(list, &list->main, node); }
 
 /* Disconnect the given node from its list.
  */
-LIST_INLINE__ void qlist_remove(QLIST* list, QLIST_NODE* node_prev, QLIST_NODE* node)
+static inline void qlist_remove(QList* list, QListNode* node_prev, QListNode* node)
         { node_prev->n = node->n;
           if(list->tail == node) list->tail = node_prev; }
-LIST_INLINE__ void qlist_remove_head(QLIST* list)
+static inline void qlist_remove_head(QList* list)
         { qlist_remove(list, &list->main, list->main.n); }
 
 

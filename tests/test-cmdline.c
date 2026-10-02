@@ -36,7 +36,7 @@ test_error_propagation_callback(int optid, const char* arg, void* userdata)
 static void
 test_error_propagation(void)
 {
-    static const CMDLINE_OPTION optlist[] = { { 0 } };
+    static const CmdlineOption optlist[] = { { 0 } };
     static char* argv[] = { "foo", "bar" };
     static const int argc = sizeof(argv) / sizeof(argv[0]);
     int ret;
@@ -66,7 +66,7 @@ test_unknown_short_option_callback(int optid, const char* arg, void* userdata)
 static void
 test_unknown_short_option(void)
 {
-    static const CMDLINE_OPTION optlist[] = { { 0 } };
+    static const CmdlineOption optlist[] = { { 0 } };
     static char* argv[] = { "foo", "-X" };
     static const int argc = sizeof(argv) / sizeof(argv[0]);
     int ret;
@@ -102,7 +102,7 @@ test_unknown_grouped_option_callback(int optid, const char* arg, void* userdata)
 static void
 test_unknown_grouped_option(void)
 {
-    static const CMDLINE_OPTION optlist[] = {
+    static const CmdlineOption optlist[] = {
         { 'a', NULL, 'a', 0 },
         { 'b', NULL, 'b', 0 },
         { 'c', NULL, 'c', 0 },
@@ -140,7 +140,7 @@ test_unknown_long_option_callback(int optid, const char* arg, void* userdata)
 static void
 test_unknown_long_option(void)
 {
-    static const CMDLINE_OPTION optlist[] = { { 0 } };
+    static const CmdlineOption optlist[] = { { 0 } };
     static char* argv[] = { "foo", "--bar=arg" };
     static const int argc = sizeof(argv) / sizeof(argv[0]);
     int ret;
@@ -162,7 +162,7 @@ test_no_options_callback(int optid, const char* arg, void* userdata)
 static void
 test_no_options(void)
 {
-    static const CMDLINE_OPTION optlist[] = { { 0 } };
+    static const CmdlineOption optlist[] = { { 0 } };
     static char* argv[] = { "foo" };
     static const int argc = sizeof(argv) / sizeof(argv[0]);
     int ret;
@@ -173,7 +173,7 @@ test_no_options(void)
 
 /****************************************************************************/
 
-typedef struct TEST_SHORT_OPTIONS_RESULT {
+typedef struct TestShortOptionsResult {
     int a_used;
     int b_used;
     int c_used;
@@ -181,12 +181,12 @@ typedef struct TEST_SHORT_OPTIONS_RESULT {
     int e_used;
     int f_used;
     int nonoption_arg_used;
-} TEST_SHORT_OPTIONS_RESULT;
+} TestShortOptionsResult;
 
 static int
 test_short_options_callback(int optid, const char* arg, void* userdata)
 {
-    TEST_SHORT_OPTIONS_RESULT* res = (TEST_SHORT_OPTIONS_RESULT*) userdata;
+    TestShortOptionsResult* res = (TestShortOptionsResult*) userdata;
 
     switch(optid) {
         case 'a':
@@ -235,7 +235,7 @@ test_short_options_callback(int optid, const char* arg, void* userdata)
 static void
 test_short_options(void)
 {
-    static const CMDLINE_OPTION optlist[] = {
+    static const CmdlineOption optlist[] = {
         { 'a', NULL, 'a', 0 },
         { 'b', NULL, 'b', 0 },
         { 'c', NULL, 'c', 0 },
@@ -246,7 +246,7 @@ test_short_options(void)
     };
     static char* argv[] = { "foo", "-a", "-bc", "-darg", "-e", "arg", "-f", "arg" };
     static const int argc = sizeof(argv) / sizeof(argv[0]);
-    TEST_SHORT_OPTIONS_RESULT res = { 0 };
+    TestShortOptionsResult res = { 0 };
     int ret;
 
     ret = cmdline_read(optlist, argc, argv, test_short_options_callback, &res);
@@ -260,17 +260,17 @@ test_short_options(void)
 
 /****************************************************************************/
 
-typedef struct TEST_LONG_OPTIONS_RESULT {
+typedef struct TestLongOptionsResult {
     int a_used;
     int b_used;
     int c_used;
     int d_used;
-} TEST_LONG_OPTIONS_RESULT;
+} TestLongOptionsResult;
 
 static int
 test_long_options_callback(int optid, const char* arg, void* userdata)
 {
-    TEST_LONG_OPTIONS_RESULT* res = (TEST_LONG_OPTIONS_RESULT*) userdata;
+    TestLongOptionsResult* res = (TestLongOptionsResult*) userdata;
 
     switch(optid) {
         case 'a':
@@ -304,7 +304,7 @@ test_long_options_callback(int optid, const char* arg, void* userdata)
 static void
 test_long_options(void)
 {
-    static const CMDLINE_OPTION optlist[] = {
+    static const CmdlineOption optlist[] = {
         { 0, "long-a", 'a', 0 },
         { 0, "long-b", 'b', CMDLINE_OPTFLAG_REQUIREDARG },
         { 0, "long-c", 'c', CMDLINE_OPTFLAG_OPTIONALARG },
@@ -313,7 +313,7 @@ test_long_options(void)
     };
     static char* argv[] = { "foo", "--long-a", "--long-b=arg", "--long-c", "--long-d=arg" };
     static const int argc = sizeof(argv) / sizeof(argv[0]);
-    TEST_LONG_OPTIONS_RESULT res = { 0 };
+    TestLongOptionsResult res = { 0 };
     int ret;
 
     ret = cmdline_read(optlist, argc, argv, test_long_options_callback, &res);
@@ -358,7 +358,7 @@ test_compilerlike_options_callback(int optid, const char* arg, void* userdata)
 static void
 test_compilerlike_options(void)
 {
-    static const CMDLINE_OPTION optlist[] = {
+    static const CmdlineOption optlist[] = {
         { 0, "-D", 'D', CMDLINE_OPTFLAG_COMPILERLIKE },
         { 0, "-I", 'I', CMDLINE_OPTFLAG_COMPILERLIKE },
         { 0, "-Y", 'Y', CMDLINE_OPTFLAG_COMPILERLIKE },
@@ -374,7 +374,7 @@ test_compilerlike_options(void)
 
 /****************************************************************************/
 
-typedef struct TEST_NONOPTIONS_RESULT {
+typedef struct TestNonoptionsResult {
     int a_used;
     int b_used;
     int c_used;
@@ -384,12 +384,12 @@ typedef struct TEST_NONOPTIONS_RESULT {
     int arg_c_used;
     int arg_d_used;
     int arg_doubledash_used;
-} TEST_NONOPTIONS_RESULT;
+} TestNonoptionsResult;
 
 static int
 test_nonoptions_callback(int optid, const char* arg, void* userdata)
 {
-    TEST_NONOPTIONS_RESULT* res = (TEST_NONOPTIONS_RESULT*) userdata;
+    TestNonoptionsResult* res = (TestNonoptionsResult*) userdata;
 
     switch(optid) {
         case 'a':
@@ -434,7 +434,7 @@ test_nonoptions_callback(int optid, const char* arg, void* userdata)
 static void
 test_nonoptions(void)
 {
-    static const CMDLINE_OPTION optlist[] = {
+    static const CmdlineOption optlist[] = {
         { 'a', NULL,     'a', 0 },
         { 0,   "long-b", 'b', CMDLINE_OPTFLAG_OPTIONALARG },
         { 'c', NULL,     'c', 0 },
@@ -443,7 +443,7 @@ test_nonoptions(void)
     };
     static char* argv[] = { "foo", "-a", "-", "--long-b", "xyz", "--", "-c", "--long-d", "--" };
     static const int argc = sizeof(argv) / sizeof(argv[0]);
-    TEST_NONOPTIONS_RESULT res = { 0 };
+    TestNonoptionsResult res = { 0 };
 
     int ret;
 

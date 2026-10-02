@@ -35,39 +35,26 @@ extern "C" {
 #endif
 
 
-#if defined __cplusplus
-    #define BUFFER_INLINE__     inline
-#elif defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
-    #define BUFFER_INLINE__     static inline
-#elif defined __GNUC__
-    #define BUFFER_INLINE__     static __inline__
-#elif defined _MSC_VER
-    #define BUFFER_INLINE__     static __inline
-#else
-    #define BUFFER_INLINE__     static
-#endif
-
-
 /* Simple automatically growing buffer implementation.
  * The realloc() growth is exponential to provide constant amortized time
  * complexity O(1).
  */
 
 
-typedef struct BUFFER {
+typedef struct Buffer {
     void* data;
     size_t size;
     size_t alloc;
-} BUFFER;
+} Buffer;
 
 
 /* Static initializer. */
 #define BUFFER_INITIALIZER          { NULL, 0, 0 }
 
 /* Initialize/deinitialize buffer structure. */
-BUFFER_INLINE__ void buffer_init(BUFFER* buf)
+static inline void buffer_init(Buffer* buf)
         { buf->data = NULL; buf->size = 0; buf->alloc = 0; }
-BUFFER_INLINE__ void buffer_fini(BUFFER* buf)
+static inline void buffer_fini(Buffer* buf)
         { free(buf->data); }
 
 /* Change capacity of the buffer.
@@ -82,59 +69,59 @@ BUFFER_INLINE__ void buffer_fini(BUFFER* buf)
  * buffer_reserve() makes sure there is at least N free bytes in the buffer
  * on top of already used capacity.
  */
-int buffer_realloc(BUFFER* buf, size_t alloc);
-int buffer_reserve(BUFFER* buf, size_t n);
+int buffer_realloc(Buffer* buf, size_t alloc);
+int buffer_reserve(Buffer* buf, size_t n);
 
 /* Shrink the buffer not to hold an excessive amount of unused memory. */
-void buffer_shrink(BUFFER* buf);
+void buffer_shrink(Buffer* buf);
 
-BUFFER_INLINE__ size_t buffer_size(const BUFFER* buf)
+static inline size_t buffer_size(const Buffer* buf)
         { return buf->size; }
-BUFFER_INLINE__ int buffer_is_empty(const BUFFER* buf)
+static inline int buffer_is_empty(const Buffer* buf)
         { return (buf->size == 0); }
 
 /* Const accessors. */
-BUFFER_INLINE__ const void* buffer_const_data(const BUFFER* buf)
+static inline const void* buffer_const_data(const Buffer* buf)
         { return buf->data; }
-BUFFER_INLINE__ const void* buffer_const_data_at(const BUFFER* buf, size_t off)
+static inline const void* buffer_const_data_at(const Buffer* buf, size_t off)
         { return (const void*) (((const uint8_t*)buf->data) + off); }
 
 /* Mutable accessors. */
-BUFFER_INLINE__ void* buffer_data(BUFFER* buf)
+static inline void* buffer_data(Buffer* buf)
         { return buf->data; }
-BUFFER_INLINE__ void* buffer_data_at(BUFFER* buf, size_t off)
+static inline void* buffer_data_at(Buffer* buf, size_t off)
         { return (void*) (((uint8_t*)buf->data) + off); }
 
 /* Inserting N bytes.
  * The _raw variant on success returns pointer where app is supposed to write
  * N bytes; or NULL on error. */
-void* buffer_insert_raw(BUFFER* buf, size_t off, size_t n);
-int buffer_insert(BUFFER* buf, size_t off, const void* data, size_t n);
+void* buffer_insert_raw(Buffer* buf, size_t off, size_t n);
+int buffer_insert(Buffer* buf, size_t off, const void* data, size_t n);
 
 /* Appending.
  * The _raw variant on success returns pointer where app is supposed to write
  * N bytes; or NULL on error. */
-BUFFER_INLINE__ void* buffer_append_raw(BUFFER* buf, size_t n)
+static inline void* buffer_append_raw(Buffer* buf, size_t n)
         { return buffer_insert_raw(buf, buf->size, n); }
-BUFFER_INLINE__ int buffer_append(BUFFER* buf, const void* data, size_t n)
+static inline int buffer_append(Buffer* buf, const void* data, size_t n)
         { return buffer_insert(buf, buf->size, data, n); }
 
 /* Remove N bytes from the given offset. */
-void buffer_remove(BUFFER* buf, size_t off, size_t n);
+void buffer_remove(Buffer* buf, size_t off, size_t n);
 
 /* Remove all buffer contents. */
-BUFFER_INLINE__ void buffer_clear(BUFFER* buf)
+static inline void buffer_clear(Buffer* buf)
         { buffer_remove(buf, 0, buf->size); }
 
 /* Take over the responsibility of the buffer contents. Caller then
  * eventually must free() the returned block. */
-BUFFER_INLINE__ void* buffer_acquire(BUFFER* buf, size_t* p_size)
+static inline void* buffer_acquire(Buffer* buf, size_t* p_size)
         { void* data = buf->data; if(p_size != NULL) *p_size = buf->size;
           buffer_init(buf); return data; }
 
 /* Swap contents of two buffers. */
-BUFFER_INLINE__ void buffer_swap(BUFFER* buf1, BUFFER* buf2)
-        { BUFFER tmp; tmp = *buf1; *buf1 = *buf2; *buf2 = tmp; }
+static inline void buffer_swap(Buffer* buf1, Buffer* buf2)
+        { Buffer tmp; tmp = *buf1; *buf1 = *buf2; *buf2 = tmp; }
 
 
 #ifdef __cplusplus

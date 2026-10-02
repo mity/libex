@@ -28,12 +28,12 @@
 #include "fnv1a_64.h"
 
 
-typedef struct TEST_VECTOR {
+typedef struct TestVector {
     const char* str;
     size_t n;
     uint32_t fnv32;
     uint64_t fnv64;
-} TEST_VECTOR;
+} TestVector;
 
 
 
@@ -52,7 +52,7 @@ typedef struct TEST_VECTOR {
 #define R100(x)     R10(x)R10(x)R10(x)R10(x)R10(x)R10(x)R10(x)R10(x)R10(x)R10(x)
 #define R10(x)      x x x x x x x x x x
 
-static const TEST_VECTOR test_vectrors[] = {
+static const TestVector test_vectrors[] = {
     { TEST(""), 0x811c9dc5U, 0xcbf29ce484222325U },
     { TEST("a"), 0xe40c292cU, 0xaf63dc4c8601ec8cU },
     { TEST("b"), 0xe70c2de5U, 0xaf63df4c8601f1a5U },

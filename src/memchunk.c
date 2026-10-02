@@ -26,13 +26,13 @@
 #include "memchunk.h"
 
 
-struct MEMCHUNK_BLOCK {
-    struct MEMCHUNK_BLOCK* next;
+struct MemChunkBlock {
+    struct MemChunkBlock* next;
 };
 
 
 void
-memchunk_init(MEMCHUNK* chunk, size_t block_size)
+memchunk_init(MemChunk* chunk, size_t block_size)
 {
     if(block_size == 0)
         block_size = MEMCHUNK_DEFAULT_BLOCK_SIZE;
@@ -43,7 +43,7 @@ memchunk_init(MEMCHUNK* chunk, size_t block_size)
 }
 
 void*
-memchunk_alloc(MEMCHUNK* chunk, size_t size)
+memchunk_alloc(MemChunk* chunk, size_t size)
 {
     void* ptr;
 
@@ -61,9 +61,9 @@ memchunk_alloc(MEMCHUNK* chunk, size_t size)
              * head block). This is a simple policy to prevent wasting memory
              * at the end of the chunk->head which still can possibly serve
              * future smaller requests. */
-            MEMCHUNK_BLOCK* block;
+            MemChunkBlock* block;
 
-            block = malloc(sizeof(MEMCHUNK_BLOCK) + size);
+            block = malloc(sizeof(MemChunkBlock) + size);
             if(block == NULL)
                 return NULL;
             if(chunk->head != NULL) {
@@ -79,9 +79,9 @@ memchunk_alloc(MEMCHUNK* chunk, size_t size)
             return (void*)(block + 1);
         } else {
             /* Allocate a standard new block. */
-            MEMCHUNK_BLOCK* block;
+            MemChunkBlock* block;
 
-            block = malloc(sizeof(MEMCHUNK_BLOCK) + chunk->block_size);
+            block = malloc(sizeof(MemChunkBlock) + chunk->block_size);
             if(block == NULL)
                 return NULL;
 
@@ -101,9 +101,9 @@ memchunk_alloc(MEMCHUNK* chunk, size_t size)
 }
 
 void
-memchunk_fini(MEMCHUNK* chunk)
+memchunk_fini(MemChunk* chunk)
 {
-    MEMCHUNK_BLOCK* block = chunk->head;
+    MemChunkBlock* block = chunk->head;
 
     while(block != NULL) {
         chunk->head = block->next;

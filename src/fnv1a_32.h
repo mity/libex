@@ -34,19 +34,6 @@ extern "C" {
 #endif
 
 
-#if defined __cplusplus
-    #define FNV1A32_INLINE__    inline
-#elif defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
-    #define FNV1A32_INLINE__    static inline
-#elif defined __GNUC__
-    #define FNV1A32_INLINE__    static __inline__
-#elif defined _MSC_VER
-    #define FNV1A32_INLINE__    static __inline
-#else
-    #define FNV1A32_INLINE__    static
-#endif
-
-
 /* 32-bit Fowler-Noll-Vo hash implementation.
  * (http://www.isthe.com/chongo/tech/comp/fnv/)
  *
@@ -56,12 +43,12 @@ extern "C" {
 
 #define FNV1A_32_INIT       ((uint32_t)2166136261U)
 
-FNV1A32_INLINE__ uint32_t fnv1a_32_beg(void)
+static inline uint32_t fnv1a_32_beg(void)
     { return FNV1A_32_INIT; }
 uint32_t fnv1a_32_part(uint32_t fnv1a, const void* data, size_t n);
 
 
-FNV1A32_INLINE__ uint32_t fnv1a_32(const void* data, size_t n)
+static inline uint32_t fnv1a_32(const void* data, size_t n)
     { return fnv1a_32_part(FNV1A_32_INIT, data, n); }
 
 
