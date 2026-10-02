@@ -6,7 +6,7 @@ Home: https://github.com/mity/libex
 
 ## Overview
 
-This is collection of assorted C utilities which can roughly be seen as an
+This is a collection of assorted C utilities which can roughly be seen as an
 extension of standard library, with the following properties:
 
  * **Highly reusable**
@@ -19,13 +19,8 @@ extension of standard library, with the following properties:
 
 ### As any other library:
 
- 1. Instruct your compiler to search the include directory
-    (e.g. via `-Iinclude`) and use `#include "ex/headername.h"` in your source
-    file(s) as needed.
-
-    Alternatively it's also possible to use (e.g. via `-Iinclude/ex`) and then
-    use `#include "headername.h"` if you're not afraid of header filename
-    collisions with your own project or another library.
+ 1. Instruct your compiler to search the source directory
+    (e.g. via `-Ipath/to/src`).
 
  2. Link your program with `libex` library.
 
@@ -46,7 +41,7 @@ to the required  minimum.)
 
 ## Compatibility Note
 
-Please note we do **not** provide any formal compatibility guaranteed, both on
+Please note we do **not** provide any formal compatibility guarantees, both on
 the binary as well as source level, at least at the moment.
 
 Of course we don't change any our interface willy-nilly unless there's strong
@@ -64,45 +59,53 @@ directly in the respective header files.
 
 ### Data Structures
 
- * **`ex/buffer.h`:** Simple grawable/shrinkable buffer implementation.
+ * **`buffer.[hc]`:** Simple growable/shrinkable buffer implementation.
+   Requires `goodaloc.[hc]`.
 
- * **`ex/rbtree.h`:** Intrusive red-black tree implementation.
+ * **`rbtree.[hc]`:** Intrusive red-black tree implementation.
 
- * **`ex/stack.h`:** Simple stack implementation (wrapper of `ex/buffer.h`).
+ * **`stack.h`:** Simple stack implementation, header-only wrapper of
+   `ex/buffer.[hc]`.
 
-### Hash Functions
+ * **`list.h`:** Simple intrusive header-only implementation of double-linked
+   lists, single-linked lists (S-lists) and single-linked lists with tail
+   (Q-lists aka queue lists).
 
- * **`ex/fnv1a_32.h`:** 32-bit Fowler–Noll–Vo hash hash (variant FNV1a).
+### Hash Functions and Cyclic Redundancy Check Functions
 
- * **`ex/fnv1a_64.h`:** 64-bit Fowler–Noll–Vo hash hash (variant FNV1a).
+ * **`crc32.[hc]`:** CRC-32.
 
- * **`ex/murmur3_32.h`:** 32-bit MurMur3 hash by Austin Appleby.
+ * **`fnv1a_32.[hc]`:** 32-bit Fowler–Noll–Vo hash hash (variant FNV1a).
 
-### Memory Allocators
+ * **`fnv1a_64.[hc]`:** 64-bit Fowler–Noll–Vo hash hash (variant FNV1a).
 
- * **`ex/goodalloc.h`:** Heuristics for good buffer allocation sizes.
+ * **`murmur3_32.[hc]`:** 32-bit MurMur3 hash by Austin Appleby.
 
- * **`ex/malloca.h`:** `MALLOCA()` and `FREEA()` macros, which are portable
+### Memory Management and Allocators
+
+ * **`goodalloc.[hc]`:** Simple heuristics for good buffer allocation sizes.
+
+ * **`malloca.h`:** `MALLOCA()` and `FREEA()` macros, which are portable
    equivalents of `_malloca()` and `_freea()` from Windows SDKs by Microsoft.
 
- * **`ex/memchunk.h`:** Specialized allocator for situations when a lot of
+ * **`memchunk.[hc]`:** Specialized allocator for situations when a lot of
    (small) allocations is needed, and which are then eventually all freed at
-   once (whole "chunk"). Provides smaller overhead than `malloc`.
+   once (whole "chunk"). Provides smaller overhead per-allocation than
+   `malloc`, and also better data locality.
 
 ### Miscellaneous
 
- * **`ex/crc32.h`:** CRC32.
+ * **`defs.h`:** Header with miscellaneous macros such as `MIN`, `MAX`,
+   `ABS`, `SIZEOF_ARRAY`, `OFFSETOF`, `CONTAINEROF`, with typical C
+   implementations of those macros.
 
- * **`ex/defs.h`:** Miscellaneous macros such as `MIN`, `MAX`, `ABS`,
-   `SIZEOF_ARRAY`, `OFFSETOF`, `CONTAINEROF`, with typical C implementations
-   of those macros.
-
- * **`ex/cmdline.h`:** Lightweight command line (`argc`, `argv`) parsing.
+ * **`cmdline.[hc]`:** Lightweight command line (`argc`, `argv`) parsing.
 
 ### Windows-specific Modules
 
- * **`ex/memstream.h`:** Simple read-only memory-backed implementation of the
-   COM interface `IStream`.
+ * **`memstream.[hc]`:** Simple read-only memory-backed implementation of the
+   COM interface `IStream`, usable to e.g. feed COM interfaces with data stored
+   as Windows resources (via `LoadResourceEx()`).
 
 
 ## License
