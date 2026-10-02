@@ -44,7 +44,7 @@ extern "C" {
  *
  *  - Double-linked lists (List)
  *  - Single-linked lists (SList)
- *  - Single-linked lists which also the tail, aka queue (QList)
+ *  - Single-linked lists which also has a tail, aka queue list (QList)
  *
  * The word intrusive means our node structures (ListNode, SListNode or
  * QListNode) don't hold any data on their own. Instead, you are supposed to
