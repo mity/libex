@@ -1,0 +1,49 @@
+name: Build and Test
+
+on:
+  - pull_request
+  - push
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: CFLAGS='-g -O0' cmake -DCMAKE_BUILD_TYPE=Debug -G 'Unix Makefiles' .
+      - name: Build
+        run: make VERBOSE=1
+      - name: Test
+        run: for testsuite in test-*; do echo "Running $testsuite:"; ./$testsuite; done
+
+  # Windows builds.
+  #
+  # We do both 32 and 64-bit builds. Also note 32-bit does Debug build while
+  # 64-bit one does Release build. (Full matrix would likely be an overkill.)
+  windows-32-debug:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Dev command prompt
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+      - name: Configure
+        run: cmake -DCMAKE_BUILD_TYPE=Debug -G "NMake Makefiles" .
+      - name: Build
+        run: nmake
+
+  windows-64-release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Dev command prompt
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Configure
+        run: cmake -DCMAKE_BUILD_TYPE=Release -G "NMake Makefiles" .
+      - name: Build
+        run: nmake
