@@ -23,6 +23,8 @@
  * IN THE SOFTWARE.
  */
 
+#include <limits.h>
+#include <stdint.h>
 #include "goodalloc.h"
 
 

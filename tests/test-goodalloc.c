@@ -23,6 +23,8 @@
  * IN THE SOFTWARE.
  */
 
+#include <stdint.h>
+
 #include "acutest.h"
 #include "goodalloc.h"
 
