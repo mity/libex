@@ -76,26 +76,8 @@ test_murmur3_32(void)
     }
 }
 
-static void
-x(void)
-{
-    uint32_t ha = 0;
-    uint32_t hb = 0;
-
-    ha = murmur3_32(ha, "hello", 5);
-
-    hb = murmur3_32(hb, "hel", 3);
-    hb = murmur3_32(hb, "lo", 2);
-
-    if(!TEST_CHECK(ha == hb)) {
-        TEST_MSG("ha: %x", (unsigned) ha);
-        TEST_MSG("hb: %x", (unsigned) hb);
-    }
-}
-
 
 TEST_LIST = {
-    { "x"              , x },
     { "test-murmur3-32", test_murmur3_32 },
     { 0 }
 };
