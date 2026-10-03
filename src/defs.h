@@ -178,14 +178,19 @@
     #if defined DEBUG  ||  defined ENABLE_ASSERTIONS
         #include <assert.h>
         #define ASSERT(x)           assert(x)
-    #elif defined __STDC_VERSION__  &&  __STDC_VERSION__ >= 202311
-        #define ASSERT(x)           do { if(!(x)) unreachable(); } while(0)
     #elif defined __GNUC__
         #define ASSERT(x)           do { if(!(x)) __builtin_unreachable(); } while(0)
     #elif defined __clang__
         #define ASSERT(x)           do { if(!(x)) __builtin_unreachable(); } while(0)
     #elif defined _MSC_VER  &&  _MSC_VER > 120
         #define ASSERT(x)           __assume(x)
+    #elif defined __STDC_VERSION__  &&  __STDC_VERSION__ >= 202311
+        /* Try this only as a fallback, because gcc says it supports 202311
+         * but it does not recognize this function.
+         * (At least within msys2/ucrt64 environment, might be an issue with
+         * headers).
+         */
+        #define ASSERT(x)           do { if(!(x)) unreachable(); } while(0)
     #else
         #define ASSERT(x)           do {} while(0)
     #endif
