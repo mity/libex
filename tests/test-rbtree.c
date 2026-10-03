@@ -201,21 +201,20 @@ test_insert_lookup(void)
 static void
 test_build(void)
 {
-    static const int count = 4;
     RBTree tree = RBTREE_INITIALIZER(val_cmp);
-    Val vals[count];
-    RBTreeNode* nodes[count];
+    Val vals[4];
+    RBTreeNode* nodes[sizeof(vals) / sizeof(vals[0])];
     int i;
 
-    for(i = 0; i < count; i++) {
+    for(i = 0; i < sizeof(vals) / sizeof(vals[0]); i++) {
         nodes[i] = &vals[i].the_node;
         vals[i].x = i;
     }
 
-    rbtree_build(&tree, nodes, count);
+    rbtree_build(&tree, nodes, sizeof(nodes) / sizeof(nodes[0]));
     TEST_CHECK(rbtree_verify(&tree) == 0);
 
-    for(i = 0; i < count; i++) {
+    for(i = 0; i < sizeof(vals) / sizeof(vals[0]); i++) {
         Val key;
         key.x = i;
         TEST_CHECK(rbtree_lookup(&tree, &key.the_node) != NULL);
