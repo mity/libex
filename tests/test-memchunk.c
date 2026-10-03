@@ -65,8 +65,8 @@ test_alloc_big(void)
         prev_ptr = ptr;
     }
 
-    /* Allocate a bug block. */
-    ptr = memchunk_alloc(&chunk, 2048);
+    /* Allocate a block bugger than a block size. */
+    ptr = memchunk_alloc(&chunk, chunk.block_size + 1);
     TEST_ASSERT(ptr != NULL);
     memset(ptr, 0xaa, 2048);
 
