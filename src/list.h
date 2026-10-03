@@ -44,7 +44,7 @@ extern "C" {
  *
  *  - Double-linked lists (List)
  *  - Single-linked lists (SList)
- *  - Single-linked lists which also has a tail, aka queue list (QList)
+ *  - Single-linked lists which also the tail, aka queue (QList)
  *
  * The word intrusive means our node structures (ListNode, SListNode or
  * QListNode) don't hold any data on their own. Instead, you are supposed to
@@ -197,8 +197,7 @@ static inline void list_remove_head(List* list)
 static inline void list_remove_tail(List* list)
         { list_remove(list, list->main.p); }
 
-/* Convenient macro for walking the whole list.
- */
+
 #define LIST_FOR_EACH(list, node)  \
         for((node) = list_head((list)); (node) != list_end((list)); (node) = list_next((node)))
 
@@ -241,9 +240,9 @@ static inline int slist_is_empty(const SList* list)
 
 /* Iterating the list.
  */
-static inline SListNode* slist_head(const SList* list)      { return list->main.n; }
-static inline SListNode* slist_next(const SListNode* node)  { return node->n; }
-static inline const SListNode* slist_end(const SList* list) { return &list->main; }
+static inline SListNode* slist_head(const SList* list)         { return list->main.n; }
+static inline SListNode* slist_next(const SListNode* node)    { return node->n; }
+static inline const SListNode* slist_end(const SList* list)    { return &list->main; }
 
 /* Add the given node into the list.
  *
@@ -262,11 +261,6 @@ static inline void slist_remove(SList* list, SListNode* node_prev, SListNode* no
         { (void)list; node_prev->n = node->n; }
 static inline void slist_remove_head(SList* list)
         { slist_remove(list, &list->main, list->main.n); }
-
-/* Convenient macro for walking the whole list.
- */
-#define SLIST_FOR_EACH(list, node)  \
-        for((node) = slist_head((list)); (node) != slist_end((list)); (node) = slist_next((node)))
 
 
 /*****************************************************
@@ -307,7 +301,7 @@ static inline int qlist_is_empty(const QList* list)
  */
 static inline QListNode* qlist_head(const QList* list)         { return list->main.n; }
 static inline QListNode* qlist_tail(const QList* list)         { return list->tail; }
-static inline QListNode* qlist_next(const QListNode* node)     { return node->n; }
+static inline QListNode* qlist_next(const QListNode* node)    { return node->n; }
 static inline const QListNode* qlist_end(const QList* list)    { return &list->main; }
 
 /* Add the given node into the list.
@@ -331,12 +325,6 @@ static inline void qlist_remove(QList* list, QListNode* node_prev, QListNode* no
           if(list->tail == node) list->tail = node_prev; }
 static inline void qlist_remove_head(QList* list)
         { qlist_remove(list, &list->main, list->main.n); }
-
-
-/* Convenient macro for walking the whole list.
- */
-#define QLIST_FOR_EACH(list, node)  \
-        for((node) = qlist_head((list)); (node) != qlist_end((list)); (node) = qlist_next((node)))
 
 
 #ifdef __cplusplus
