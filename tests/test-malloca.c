@@ -23,10 +23,34 @@
  * IN THE SOFTWARE.
  */
 
+
+
 #include "acutest.h"
+
+/* We use our own allocator functions for testing purposes. */
+#define MALLOC_FUNC     my_malloc
+#define FREE_FUNC       my_free
 #include "malloca.h"
 
 #include <stdint.h>
+
+
+static unsigned malloc_counter = 0;
+static unsigned free_counter = 0;
+
+void*
+my_malloc(size_t size)
+{
+    malloc_counter++;
+    return malloc(size);
+}
+
+void
+my_free(void* ptr)
+{
+    free_counter++;
+    free(ptr);
+}
 
 
 static void
@@ -44,49 +68,42 @@ test_malloca_zero(void)
 static void
 test_malloca_small(void)
 {
-    /* Small MALLOCA allocations should be on stack. I.e. its address should
-     * be close to a local variable. */
+    /* Test that small allocations are on stack and on heap; i.e. that our
+     * my_malloc() and my_free() are never called. */
+    unsigned old_malloc_counter;
+    unsigned old_free_counter;
+    void* ptr;
 
-    int on_stack;
-    void* on_heap;
-    uintptr_t on_stack_addr;
-    uintptr_t on_heap_addr;
+    old_malloc_counter = malloc_counter;
+    old_free_counter = free_counter;
 
-    on_heap = MALLOCA(32);
-    TEST_CHECK(on_heap != NULL);
+    ptr = MALLOCA(20);
+    TEST_ASSERT(ptr != NULL);
+    strcpy(ptr, "hello");
+    FREEA(ptr);
 
-    on_stack_addr = (uintptr_t) &on_stack;
-    on_heap_addr = (uintptr_t) on_heap;
-
-    /* No assumption whether stack grows up or down. */
-    TEST_CHECK(on_stack_addr - on_heap_addr < 0xff  ||  on_heap_addr - on_stack_addr < 0xff);
-
-    FREEA(on_heap);
+    TEST_CHECK(malloc_counter == old_malloc_counter);
+    TEST_CHECK(free_counter == old_free_counter);
 }
 
 static void
 test_malloca_large(void)
 {
-    /* Similarly, large MALLOCA allocations should be on heap. I.e. its address
-     * should be far from any local variable. */
+    /* In contrast large MALLOCA allocations should be on heap. */
+    unsigned old_malloc_counter;
+    unsigned old_free_counter;
+    void* ptr;
 
-    int on_stack;
-    void* on_heap;
-    uintptr_t on_stack_addr;
-    uintptr_t on_heap_addr;
+    old_malloc_counter = malloc_counter;
+    old_free_counter = free_counter;
 
-    on_heap = MALLOCA(32 * 1024);
-    TEST_CHECK(on_heap != NULL);
+    ptr = MALLOCA(16 * 1024);
+    TEST_ASSERT(ptr != NULL);
+    strcpy(ptr, "hello");
+    FREEA(ptr);
 
-    on_stack_addr = (uintptr_t) &on_stack;
-    on_heap_addr = (uintptr_t) on_heap;
-
-    if(on_stack_addr > on_heap_addr)
-        TEST_CHECK(on_stack_addr - on_heap_addr > 16384);
-    else
-        TEST_CHECK(on_heap_addr - on_stack_addr > 16384);
-
-    FREEA(on_heap);
+    TEST_CHECK(malloc_counter == old_malloc_counter + 1);
+    TEST_CHECK(free_counter == old_free_counter + 1);
 }
 
 static void

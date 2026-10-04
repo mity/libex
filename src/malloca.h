@@ -53,7 +53,7 @@ extern "C" {
     #define EX_func_malloc__    malloc
 #endif
 #ifdef FREE_FUNC
-    void* FREE_FUNC(void*);
+    void FREE_FUNC(void*);
     #define EX_func_free__      FREE_FUNC
 #else
     #define EX_func_free__      free
@@ -94,7 +94,7 @@ MALLOCA_(size_t size, size_t threshold)
     }
 
     if(ptr != NULL) {
-        ((unsigned*)ptr)[0] = mark;
+        *((unsigned*)ptr) = mark;
         ptr = (void*)((char*)ptr + sizeof(void*));
     }
 
@@ -113,7 +113,8 @@ static inline void
 FREEA(void* ptr)
 {
     if((ptr) != NULL) {
-        if(*(unsigned*)(((char*) ptr) - sizeof(void*)) == 0xdddd)
+        ptr = ((char*) ptr) - sizeof(void*);
+        if(*(unsigned*)ptr == 0xdddd)
             EX_func_free__(ptr);
     }
 }
