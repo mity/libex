@@ -44,25 +44,28 @@ extern "C" {
 #endif
 
 
+/* Rudimentary custom allocator support.
+ * We have to be extra careful as we're in a public header here. */
+#ifdef MALLOC_FUNC
+    void* MALLOC_FUNC(size_t);
+    #define EX_func_malloc__    MALLOC_FUNC
+#else
+    #define EX_func_malloc__    malloc
+#endif
+#ifdef FREE_FUNC
+    void* FREE_FUNC(void*);
+    #define EX_func_free__      FREE_FUNC
+#else
+    #define EX_func_free__      free
+#endif
+
+
 /* On resource-limited platforms with smaller stacks (e.g. on embedded systems)
  * you may want to lower this threshold. MALLOCA allocations smaller than this
  * are allocated on stack, larger on heap. */
 #ifndef MALLOCA_THRESHOLD
     #define MALLOCA_THRESHOLD         (1024 - sizeof(void*))
 #endif
-
-
-/* Helper. Do not use directly. */
-static inline void*
-malloca_init__(void* ptr, int mark)
-{
-    if(ptr != NULL) {
-        int* x = (int*)ptr;
-        *x = mark;
-        ptr = (void*)((char*)ptr + sizeof(void*));
-    }
-    return ptr;
-}
 
 
 /* Allocate block of memory via malloc() or alloca(), depending on the
@@ -75,23 +78,45 @@ malloca_init__(void* ptr, int mark)
  * Returns pointer to the memory block or NULL on failure. When not needed
  * anymore, release it with FREEA().
  */
-#define MALLOCA_(size, threshold)                                             \
-    ((size) < (threshold)                                                     \
-        ? malloca_init__(EX_func_alloca__(size + sizeof(void*)), 0xcccc)      \
-        : malloca_init__(malloc(size + sizeof(void*)), 0xdddd))
 
-#define MALLOCA(size)       MALLOCA_((size), MALLOCA_THRESHOLD)
+static inline void*
+MALLOCA_(size_t size, size_t threshold)
+{
+    void* ptr;
+    unsigned mark;
+
+    if(size <= threshold) {
+        ptr = EX_func_alloca__(size + sizeof(void*));
+        mark = 0xcccc;
+    } else {
+        ptr = EX_func_malloc__(size + sizeof(void*));
+        mark = 0xdddd;
+    }
+
+    if(ptr != NULL) {
+        ((unsigned*)ptr)[0] = mark;
+        ptr = (void*)((char*)ptr + sizeof(void*));
+    }
+
+    return ptr;
+}
+
+static inline void*
+MALLOCA(size_t size)
+{
+    return MALLOCA_(size, MALLOCA_THRESHOLD);
+}
 
 /* Release any memory allocated with MALLOCA() or MALLOCA_().
  */
-#define FREEA(ptr)                                                            \
-    do {                                                                      \
-        if((ptr) != NULL) {                                                   \
-            int* x = (int*)((char*)(ptr) - sizeof(void*));                    \
-            if(*x == 0xdddd)                                                  \
-                free(x);                                                      \
-        }                                                                     \
-    } while(0)
+static inline void
+FREEA(void* ptr)
+{
+    if((ptr) != NULL) {
+        if(*(unsigned*)(((char*) ptr) - sizeof(void*)) == 0xdddd)
+            EX_func_free__(ptr);
+    }
+}
 
 
 #ifdef __cplusplus

@@ -108,6 +108,24 @@ directly in the respective header files.
    as Windows resources (via `LoadResourceEx()`).
 
 
+## Custom Allocator Support
+
+If macros `MALLOC_FUNC`, `REALLOC_FUNC` and/or `FREE_FUNC` are defined at the
+compilation time (or in case of inline functions in headers at the time of
+inclusion), then we assume those macros provide function names intended as
+replacements for standard `malloc()`, `realloc()` and `free()`.
+
+Naturally such custom functions must have the same prototype as the respective
+standard functions.
+
+Typically you may do so by using the command line option `-DMACRO=value`.
+For example:
+
+``` bash
+export CFLAGS="-DMALLOC_FUNC=my_malloc -DREALLOC_FUNC=my_realloc -DFREE_FUNC=my_free"
+gcc $CFLAGS myprogram.c buffer.c
+```
+
 ## License
 
 `libex` is covered with MIT license, see the file `LICENSE.md`.

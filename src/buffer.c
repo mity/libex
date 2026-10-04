@@ -27,6 +27,21 @@
 #include "goodalloc.h"
 
 
+/* Rudimentary custom allocator support. */
+#ifdef MALLOC_FUNC
+    void* MALLOC_FUNC(size_t);
+    #define malloc MALLOC_FUNC
+#endif
+#ifdef REALLOC_FUNC
+    void* REALLOC_FUNC(void*, size_t);
+    #define realloc REALLOC_FUNC
+#endif
+#ifdef FREE_FUNC
+    void* FREE_FUNC(void*);
+    #define free FREE_FUNC
+#endif
+
+
 int
 buffer_realloc(Buffer* buf, size_t alloc)
 {
