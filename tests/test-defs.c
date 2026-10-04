@@ -150,6 +150,22 @@ test_STRINGIZE(void)
         TEST_CHECK(isdigit(line[i]));
 }
 
+static void
+test_UNREACHABLE(void)
+{
+    /* This just tests it compiles. */
+    enum Enum {
+        E1,
+        E2
+    };
+    enum Enum e = E1;
+
+    switch(e) {
+        case E1:    break;
+        case E2:    break;
+        default:    UNREACHABLE(); break;
+    }
+}
 
 TEST_LIST = {
     { "min",            test_MIN },
@@ -162,5 +178,6 @@ TEST_LIST = {
     { "offsetof",       test_OFFSETOF },
     { "containerof",    test_CONTAINEROF },
     { "stringize",      test_STRINGIZE },
+    { "unreachable",    test_UNREACHABLE },
     { 0 }
 };
