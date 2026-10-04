@@ -31,21 +31,15 @@
 #ifdef _WIN32
     /* Windows do not have <alloca.h>.
      * There is _alloca() in <malloc.h> instead. */
-    #define EX_func_alloca__ _alloca
     #include <malloc.h>
+    #define EX_func_alloca__ _alloca
 #else
     #include <alloca.h>
     #define EX_func_alloca__ alloca
 #endif
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
-/* Rudimentary custom allocator support.
- * We have to be extra careful as we're in a public header here. */
+/* Rudimentary custom allocator support. */
 #ifdef MALLOC_FUNC
     void* MALLOC_FUNC(size_t);
     #define EX_func_malloc__    MALLOC_FUNC
@@ -60,9 +54,15 @@ extern "C" {
 #endif
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 /* On resource-limited platforms with smaller stacks (e.g. on embedded systems)
  * you may want to lower this threshold. MALLOCA allocations smaller than this
- * are allocated on stack, larger on heap. */
+ * are allocated on stack, larger on heap.
+ */
 #ifndef MALLOCA_THRESHOLD
     #define MALLOCA_THRESHOLD         (1024 - sizeof(void*))
 #endif
@@ -78,26 +78,24 @@ extern "C" {
  * Returns pointer to the memory block or NULL on failure. When not needed
  * anymore, release it with FREEA().
  */
-
 static inline void*
 MALLOCA_(size_t size, size_t threshold)
 {
     void* ptr;
-    unsigned mark;
 
     if(size <= threshold) {
         ptr = EX_func_alloca__(size + sizeof(void*));
-        mark = 0xcccc;
+        *((unsigned*)ptr) = 0xcccc;
     } else {
         ptr = EX_func_malloc__(size + sizeof(void*));
-        mark = 0xdddd;
+        if(ptr == NULL)
+            return NULL;
+        *((unsigned*)ptr) = 0xdddd;
     }
 
-    if(ptr != NULL) {
-        *((unsigned*)ptr) = mark;
-        ptr = (void*)((char*)ptr + sizeof(void*));
-    }
-
+    /* Advanced after the mark. Also advance for a size of pointer, to
+     * preserve the natural alignment. */
+    ptr = (void*)((char*)ptr + sizeof(void*));
     return ptr;
 }
 
@@ -112,11 +110,12 @@ MALLOCA(size_t size)
 static inline void
 FREEA(void* ptr)
 {
-    if((ptr) != NULL) {
-        ptr = ((char*) ptr) - sizeof(void*);
-        if(*(unsigned*)ptr == 0xdddd)
-            EX_func_free__(ptr);
-    }
+    if((ptr) == NULL)
+        return;
+
+    ptr = ((char*) ptr) - sizeof(void*);
+    if(*(unsigned*)ptr == 0xdddd)
+        EX_func_free__(ptr);
 }
 
 
