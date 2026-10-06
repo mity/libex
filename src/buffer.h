@@ -52,10 +52,8 @@ typedef struct Buffer {
 #define BUFFER_INITIALIZER          { NULL, 0, 0 }
 
 /* Initialize/deinitialize buffer structure. */
-static inline void buffer_init(Buffer* buf)
-        { buf->data = NULL; buf->size = 0; buf->alloc = 0; }
-static inline void buffer_fini(Buffer* buf)
-        { free(buf->data); }
+void buffer_init(Buffer* buf);
+void buffer_fini(Buffer* buf);
 
 /* Change capacity of the buffer.
  *

@@ -42,6 +42,21 @@
 #endif
 
 
+void
+buffer_init(Buffer* buf)
+{
+    buf->data = NULL;
+    buf->size = 0;
+    buf->alloc = 0;
+}
+
+void
+buffer_fini(Buffer* buf)
+{
+    if(buf->data != NULL)
+        free(buf->data);
+}
+
 int
 buffer_realloc(Buffer* buf, size_t alloc)
 {
